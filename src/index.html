@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>XXX</title>
+  <base href="/" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+</head>
+<body>
+
+<app-root></app-root>
+</body>
+</html>
+
+
+<!--<!DOCTYPE html>-->
+<!--<html>-->
+<!--<head>-->
+<!--  <link href="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.snow.min.css" rel="stylesheet">-->
+<!--  <style>-->
+<!--    .editor-container {-->
+<!--      max-width: 800px;-->
+<!--      margin: 20px auto;-->
+<!--      position: relative;-->
+<!--    }-->
+
+<!--    .block {-->
+<!--      margin: 10px 0;-->
+<!--      padding: 10px;-->
+<!--      background-color: #f9f9f9;-->
+<!--      border: 1px solid #ddd;-->
+<!--      border-radius: 4px;-->
+<!--    }-->
+
+<!--    #editor {-->
+<!--      min-height: 300px;-->
+<!--    }-->
+
+<!--    #editor img {-->
+<!--      max-width: 100%;-->
+<!--      height: auto;-->
+<!--    }-->
+
+<!--    .floating-toolbar {-->
+<!--      position: absolute;-->
+<!--      display: none;-->
+<!--      background: white;-->
+<!--      box-shadow: 0 2px 10px rgba(0,0,0,0.1);-->
+<!--      border: 1px solid #ccc;-->
+<!--      border-radius: 4px;-->
+<!--      z-index: 1000;-->
+<!--      padding: 5px;-->
+<!--    }-->
+
+<!--    #image-toolbar {-->
+<!--      text-align: center;-->
+<!--      padding: 8px;-->
+<!--    }-->
+
+<!--    #image-toolbar button {-->
+<!--      margin: 0 5px;-->
+<!--      padding: 5px 10px;-->
+<!--      border: 1px solid #ccc;-->
+<!--      border-radius: 4px;-->
+<!--      background: white;-->
+<!--      cursor: pointer;-->
+<!--    }-->
+
+<!--    #image-toolbar button:hover {-->
+<!--      background: #f0f0f0;-->
+<!--    }-->
+
+<!--    .ql-toolbar.ql-snow:not(#text-toolbar) {-->
+<!--      display: none;-->
+<!--    }-->
+<!--  </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="editor-container">-->
+<!--  <div id="text-toolbar" class="floating-toolbar ql-toolbar ql-snow">-->
+<!--    <span class="ql-formats">-->
+<!--      <select class="ql-header">-->
+<!--        <option value="1">Heading 1</option>-->
+<!--        <option value="2">Heading 2</option>-->
+<!--        <option selected>Normal</option>-->
+<!--      </select>-->
+<!--    </span>-->
+<!--    <span class="ql-formats">-->
+<!--      <button class="ql-bold"></button>-->
+<!--      <button class="ql-italic"></button>-->
+<!--      <button class="ql-underline"></button>-->
+<!--    </span>-->
+<!--    <span class="ql-formats">-->
+<!--      <button class="ql-image"></button>-->
+<!--      <button class="ql-code-block"></button>-->
+<!--    </span>-->
+<!--  </div>-->
+<!--  <div id="image-toolbar" class="floating-toolbar">-->
+<!--    <button id="resize-small">Small</button>-->
+<!--    <button id="resize-medium">Medium</button>-->
+<!--    <button id="resize-large">Large</button>-->
+<!--    <button id="delete-image">Delete</button>-->
+<!--  </div>-->
+<!--  <div id="editor"></div>-->
+<!--</div>-->
+
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.min.js"></script>-->
+<!--<script>-->
+<!--  // Custom Block Blot-->
+<!--  const Block = Quill.import('blots/block');-->
+<!--  const Parchment = Quill.import('parchment');-->
+<!--  const Delta = Quill.import('delta');-->
+
+<!--  class BlockDiv extends Block {-->
+<!--    static create(value) {-->
+<!--      const node = super.create(value);-->
+<!--      node.classList.add('block');-->
+<!--      return node;-->
+<!--    }-->
+<!--  }-->
+
+<!--  BlockDiv.blotName = 'block-div';-->
+<!--  BlockDiv.tagName = 'div';-->
+
+<!--  // Register the custom blot-->
+<!--  Quill.register(BlockDiv);-->
+
+<!--  // Initialize Quill-->
+<!--  const quill = new Quill('#editor', {-->
+<!--    theme: 'snow',-->
+<!--    modules: {-->
+<!--      toolbar: '#text-toolbar',-->
+<!--      keyboard: {-->
+<!--        bindings: {-->
+<!--          'enter': {-->
+<!--            key: 13,-->
+<!--            handler: function(range) {-->
+<!--              // Get current selection-->
+<!--              const currentSelection = quill.getSelection();-->
+<!--              if (!currentSelection) return true;-->
+
+<!--              // Get the current block's content-->
+<!--              const [block, offset] = quill.getLine(currentSelection.index);-->
+<!--              const blockLength = block.length();-->
+<!--              const blockIndex = quill.getIndex(block);-->
+
+<!--              // If cursor is at end of block-->
+<!--              if (offset === blockLength) {-->
+<!--                // Insert new block after current block-->
+<!--                quill.insertText(blockIndex + blockLength, '\n', { 'block-div': true });-->
+<!--                // Move cursor to new block-->
+<!--                quill.setSelection(blockIndex + blockLength + 1, 0);-->
+<!--              } else {-->
+<!--                // Split current block content-->
+<!--                const remainingText = block.domNode.textContent.slice(offset);-->
+<!--                // Delete remaining text from current block-->
+<!--                quill.deleteText(currentSelection.index, remainingText.length);-->
+<!--                // Insert new block with remaining text-->
+<!--                quill.insertText(blockIndex + offset + 1, remainingText + '\n', { 'block-div': true });-->
+<!--                // Move cursor to start of new block-->
+<!--                quill.setSelection(blockIndex + offset + 1, 0);-->
+<!--              }-->
+
+<!--              return false;-->
+<!--            }-->
+<!--          }-->
+<!--        }-->
+<!--      }-->
+<!--    },-->
+<!--    formats: ['block-div', 'image', 'header', 'bold', 'italic', 'underline', 'code-block']-->
+<!--  });-->
+
+<!--  const textToolbar = document.getElementById('text-toolbar');-->
+<!--  const imageToolbar = document.getElementById('image-toolbar');-->
+<!--  let selectedImage = null;-->
+
+<!--  function updateToolbarPosition(toolbar, bounds) {-->
+<!--    toolbar.style.display = 'block';-->
+<!--    toolbar.style.top = `${bounds.top - toolbar.offsetHeight - 10}px`;-->
+
+<!--    let leftPosition = bounds.left + bounds.width/2 - toolbar.offsetWidth/2;-->
+
+<!--    const editorRect = quill.container.getBoundingClientRect();-->
+<!--    const minLeft = 0;-->
+<!--    const maxLeft = editorRect.width - toolbar.offsetWidth;-->
+<!--    leftPosition = Math.max(minLeft, Math.min(leftPosition, maxLeft));-->
+
+<!--    toolbar.style.left = `${leftPosition}px`;-->
+<!--  }-->
+
+<!--  document.getElementById('resize-small').onclick = () => {-->
+<!--    if (selectedImage) {-->
+<!--      selectedImage.style.width = '200px';-->
+<!--    }-->
+<!--  };-->
+
+<!--  document.getElementById('resize-medium').onclick = () => {-->
+<!--    if (selectedImage) {-->
+<!--      selectedImage.style.width = '400px';-->
+<!--    }-->
+<!--  };-->
+
+<!--  document.getElementById('resize-large').onclick = () => {-->
+<!--    if (selectedImage) {-->
+<!--      selectedImage.style.width = '600px';-->
+<!--    }-->
+<!--  };-->
+
+<!--  document.getElementById('delete-image').onclick = () => {-->
+<!--    if (selectedImage) {-->
+<!--      const index = quill.getIndex(Quill.find(selectedImage));-->
+<!--      quill.deleteText(index, 1);-->
+<!--      imageToolbar.style.display = 'none';-->
+<!--    }-->
+<!--  };-->
+
+<!--  quill.root.addEventListener('click', function(e) {-->
+<!--    const image = e.target.tagName === 'IMG' ? e.target : null;-->
+
+<!--    if (image) {-->
+<!--      selectedImage = image;-->
+<!--      const bounds = image.getBoundingClientRect();-->
+<!--      const editorBounds = quill.container.getBoundingClientRect();-->
+
+<!--      updateToolbarPosition(imageToolbar, {-->
+<!--        top: bounds.top - editorBounds.top + window.scrollY,-->
+<!--        left: bounds.left - editorBounds.left,-->
+<!--        width: bounds.width,-->
+<!--        height: bounds.height-->
+<!--      });-->
+
+<!--      textToolbar.style.display = 'none';-->
+<!--    } else {-->
+<!--      imageToolbar.style.display = 'none';-->
+<!--      selectedImage = null;-->
+<!--    }-->
+<!--  });-->
+
+<!--  quill.on('selection-change', function(range, oldRange, source) {-->
+<!--    if (range && range.length > 0) {-->
+<!--      const bounds = quill.getBounds(range.index, range.length);-->
+<!--      updateToolbarPosition(textToolbar, bounds);-->
+<!--      imageToolbar.style.display = 'none';-->
+<!--    } else if (!selectedImage) {-->
+<!--      textToolbar.style.display = 'none';-->
+<!--    }-->
+<!--  });-->
+
+<!--  quill.root.addEventListener('paste', function(e) {-->
+<!--    const clipboard = e.clipboardData || window.clipboardData;-->
+
+<!--    if (clipboard.items) {-->
+<!--      for (let item of clipboard.items) {-->
+<!--        if (item.type.indexOf('image') !== -1) {-->
+<!--          e.preventDefault();-->
+
+<!--          const file = item.getAsFile();-->
+<!--          const reader = new FileReader();-->
+
+<!--          reader.onload = function(e) {-->
+<!--            const range = quill.getSelection(true);-->
+<!--            quill.insertEmbed(range.index, 'image', e.target.result, 'user');-->
+<!--            quill.setSelection(range.index + 1);-->
+<!--          };-->
+
+<!--          reader.readAsDataURL(file);-->
+<!--        }-->
+<!--      }-->
+<!--    }-->
+<!--  });-->
+
+<!--  quill.setContents([-->
+<!--    { insert: 'Press Enter to create new blocks...\n', attributes: { 'block-div': true } }-->
+<!--  ]);-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
