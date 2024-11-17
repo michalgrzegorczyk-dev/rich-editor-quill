@@ -1,6 +1,6 @@
 
 import { Component } from '@angular/core';
-import {QuillEditorComponent} from "./r";
+import { QuillEditorComponent } from './editor/editor.component';
 
 @Component({
   selector: 'app-root',
@@ -9,7 +9,7 @@ import {QuillEditorComponent} from "./r";
   template: `
     <div class="container p-4">
       <h1>Quill Editor Demo</h1>
-      <app-quill-editor></app-quill-editor>
+      <app-quill-editor />
     </div>
   `
 })

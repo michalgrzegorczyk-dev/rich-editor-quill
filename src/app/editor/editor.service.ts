@@ -46,6 +46,7 @@ export class QuillService {
   }
 
   private initializeQuill(editorElement: HTMLElement, toolbar: HTMLElement) {
+
     this.quillInstance = new Quill(editorElement, {
       theme: 'snow',
       modules: {
@@ -56,6 +57,28 @@ export class QuillService {
               key: 13,
               handler: this.handleEnterKey.bind(this)
             },
+            right: {
+              key: 39,
+              handler: (range: QuillRange) => {
+                if (!range) return true;
+    
+                // Use requestAnimationFrame to get the updated selection after the default handler
+                requestAnimationFrame(() => {
+                  const currentSelection = this.quillInstance.getSelection();
+                  console.log('Current selection:', currentSelection);
+                  console.log('Current contents:', this.quillInstance.getContents());
+                  
+                  const [leaf] = this.quillInstance.getLeaf(currentSelection?.index || 0);
+                  if (leaf?.domNode instanceof HTMLImageElement) {
+                    this.handleImageClick(leaf.domNode);
+                  } else {
+                    this.handleImageClick(null);
+                  }
+                });
+            
+                return true; // Let Quill handle the default arrow behavior first
+              }
+            }
           }
         }
       },
@@ -92,17 +115,6 @@ export class QuillService {
     }
 
     return false;
-  }
-
-  handleImageClick(image: HTMLImageElement | null) {
-    if (image) {
-      const blot = Quill.find(image);
-      if (blot) {
-        const index = this.quillInstance.getIndex(blot as any);
-        this.quillInstance.setSelection(index, 1);
-      }
-    }
-    this.selectedImageSubject.next(image);
   }
 
   updateToolbarPosition(toolbar: HTMLElement, bounds: ToolbarBounds, editorContainer: HTMLElement) {
@@ -142,5 +154,25 @@ export class QuillService {
       }
     }
     return false;
+  }
+
+
+  handleImageClick(image: HTMLImageElement | null) {
+    if (image) {
+      const blot = Quill.find(image);
+      if (blot) {
+        const index = this.quillInstance.getIndex(blot as any);
+        this.quillInstance.setSelection(index, 1);
+        this.selectedImageSubject.next(image);
+      }
+    } else {
+      this.selectedImageSubject.next(null);
+    }
+  }
+
+  insertImage(url: string, index?: number) {
+    const currentIndex = index ?? (this.quillInstance.getSelection()?.index || 0);
+    this.quillInstance.insertEmbed(currentIndex, 'image', url, 'user');
+    this.quillInstance.setSelection(currentIndex + 1, 0);
   }
 }
