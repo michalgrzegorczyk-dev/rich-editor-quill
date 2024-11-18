@@ -154,56 +154,6 @@ export class QuillService {
               key: 13,
               handler: this.handleEnterKey.bind(this)
             },
-            right: {
-              key: 39,
-              handler: (range: QuillRange) => {
-                // console.log('right');
-                // requestAnimationFrame(() => {
-                  // const selection: any = this.quillInstance.getSelection();
-
-                  // if (!selection) {
-                  //   return true;
-                  // }
-
-                  // const [prevLeaf] = this.quillInstance.getLeaf(selection.index) as any;
-                  
-                  // if (prevLeaf?.parent?.formats()?.bold) {
-                  //   console.log('bold');
-                  // }
-
-                  // console.log('prevLeaf', prevLeaf);
-
-
-                  // return true;
-                // });
-
-                return true;
-              }
-            },
-            left: {
-              key: 37,
-              handler: (range: QuillRange) => {
-                // if (!range) return true;
-
-                // const [currentLeaf] = this.quillInstance.getLeaf(range.index);
-                // const prevLeaf = range.index > 0 ? this.quillInstance.getLeaf(range.index - 1)[0] : null;
-
-                // // If we're after an image
-                // if (prevLeaf?.domNode instanceof HTMLImageElement && !range.length) {
-                //   // Select the image
-                //   this.quillInstance.setSelection(range.index - 1, 1);
-                //   return false;
-                // }
-
-                // // If an image is selected, move cursor before it
-                // if (currentLeaf?.domNode instanceof HTMLImageElement && range.length === 1) {
-                //   this.quillInstance.setSelection(range.index, 0);
-                //   return false;
-                // }
-
-                return true;
-              }
-            }
           }
         }
       },
@@ -211,7 +161,7 @@ export class QuillService {
     });
 
     this.quillInstance.setContents([
-      { insert: 'Press Enter to create new blocks...\n', attributes: { 'block-div': true } }
+      { insert: 'Press Enter to create new blocks...', attributes: { 'block-div': true } }
     ]);
 
     return this.quillInstance;
