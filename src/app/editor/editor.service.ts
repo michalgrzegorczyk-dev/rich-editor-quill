@@ -30,6 +30,20 @@ export class QuillService {
       });
     });
 
+    this.quillInstance.root.addEventListener('click', (event) => {
+      const target = event.target as HTMLElement;
+      if (target.tagName === 'IMG') {
+        const image = target as HTMLImageElement;
+        this.showImageToolbar(image, imageToolbar, textToolbar);
+        
+        const [blot] = this.quillInstance.getLeaf(this.quillInstance.getSelection()?.index || 0);
+        if (blot) {
+          const index = this.quillInstance.getIndex(blot);
+          this.quillInstance.setSelection(index, 0);
+        }
+      }
+    });
+
     return this.quillInstance;
   }
 
@@ -45,7 +59,7 @@ export class QuillService {
 
     const [leaf] = this.quillInstance.getLeaf(range.index);
     
-    if (leaf?.domNode instanceof HTMLImageElement) {
+    if (leaf?.domNode instanceof HTMLImageElement && range.length === 0) {
       this.showImageToolbar(leaf.domNode, imageToolbar, textToolbar);
     } else if (range.length > 0) {
       this.showTextToolbar(range, textToolbar, imageToolbar);
