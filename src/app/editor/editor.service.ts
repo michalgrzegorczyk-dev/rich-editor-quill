@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import Quill from 'quill';
 
 export interface QuillRange {
@@ -20,13 +20,17 @@ export class QuillService {
   private quillInstance!: Quill;
   private selectedImage: HTMLImageElement | null = null;
 
+  constructor(private ngZone: NgZone) {}
+
   initialize(editorElement: HTMLElement, textToolbar: HTMLElement, imageToolbar: HTMLElement) {
     this.registerCustomBlots();
     this.initializeQuill(editorElement, textToolbar);
     
     this.quillInstance.on('selection-change', (range: QuillRange | null) => {
-      requestAnimationFrame(() => {
-        this.updateToolbarVisibility(range, textToolbar, imageToolbar);
+      this.ngZone.runOutsideAngular(() => {
+        requestAnimationFrame(() => {
+          this.updateToolbarVisibility(range, textToolbar, imageToolbar);
+        });
       });
     });
 
@@ -34,8 +38,17 @@ export class QuillService {
       const target = event.target as HTMLElement;
       
       if (target.tagName === 'IMG') {
-        const image = target as HTMLImageElement;
-        this.showImageToolbar(image, imageToolbar, textToolbar);
+        
+        // First clear any existing selection
+        this.quillInstance.setSelection(null);
+        
+        // Use requestAnimationFrame to ensure DOM updates are complete
+        this.ngZone.runOutsideAngular(() => {
+          requestAnimationFrame(() => {
+            const image = target as HTMLImageElement;
+            this.showImageToolbar(image, imageToolbar, textToolbar);
+          });
+        });
       }
     });
 
