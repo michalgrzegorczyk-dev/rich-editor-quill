@@ -8,7 +8,7 @@ import { QuillEditorComponent } from './editor/editor.component';
   imports: [QuillEditorComponent],
   template: `
     <div class="container p-4">
-      <h1>Quill Editor Demo</h1>
+      <h1>Ngx Rich Document Editor</h1>
       <app-quill-editor />
     </div>
   `

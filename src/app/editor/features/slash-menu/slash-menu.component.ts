@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Output, signal } from '@angular/core';
+import { MenuPosition } from '../../models/menu-position.model';
 
 @Component({
   selector: 'app-slash-menu',
@@ -10,7 +11,7 @@ export class SlashMenuComponent {
   @Output() optionSelected = new EventEmitter<string>();
   
   private _filter = signal('');
-  menuPosition = signal({ top: 0, left: 0 });
+  menuPosition = signal<MenuPosition>({ top: 0, left: 0 });
   
   options = ['Option 1', 'Option 2', 'Option 3'];
   filteredOptions = signal(this.options);
@@ -21,27 +22,20 @@ export class SlashMenuComponent {
   }
 
   onOptionSelect(option: string) {
-    console.log('Option selected:', option);
     this.optionSelected.emit(option);
   }
 
   private updateFilteredOptions() {
     const filterText = this._filter().toLowerCase().replace('/', '').trim();
-    console.log('Filtering with:', filterText);
     
-    if (!filterText) {
-      this.filteredOptions.set(this.options);
-      return;
-    }
-
-    const filtered = this.options.filter(option => 
-      option.toLowerCase().includes(filterText)
+    this.filteredOptions.set(
+      filterText ? this.options.filter(option => 
+        option.toLowerCase().includes(filterText)
+      ) : this.options
     );
-    console.log('Filtered options:', filtered);
-    this.filteredOptions.set(filtered);
   }
 
-  setPosition(value: { top: number; left: number }) {
-    this.menuPosition.set(value);
+  setPosition(position: MenuPosition) {
+    this.menuPosition.set(position);
   }
 } 

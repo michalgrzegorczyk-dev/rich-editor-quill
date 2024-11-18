@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { ToolbarBounds } from './models/toolbar-bounds.model';
-import { QuillRange } from './models/quill-range.model';
 import Quill from 'quill';
+import { QuillRange } from '../models/quill-range.model';
+import { ToolbarBounds } from '../models/toolbar-bounds.model';
 
 @Injectable({
   providedIn: 'root'
@@ -9,12 +9,8 @@ import Quill from 'quill';
 export class QuillToolbarService {
   private selectedImage: HTMLImageElement | null = null;
 
-  getSelectedImage(): HTMLImageElement | null {
-    return this.selectedImage;
-  }
-
   updateToolbarVisibility(
-    quillInstance: Quill,
+    quill: Quill,
     range: QuillRange | null, 
     textToolbar: HTMLElement, 
     imageToolbar: HTMLElement
@@ -24,12 +20,12 @@ export class QuillToolbarService {
       return;
     }
 
-    const [leaf] = quillInstance.getLeaf(range.index);
+    const [leaf] = quill.getLeaf(range.index);
     
     if (leaf?.domNode instanceof HTMLImageElement && range.length === 0) {
-      this.showImageToolbar(quillInstance, leaf.domNode, imageToolbar, textToolbar);
+      this.showImageToolbar(quill, leaf.domNode, imageToolbar, textToolbar);
     } else if (range.length > 0) {
-      this.showTextToolbar(quillInstance, range, textToolbar, imageToolbar);
+      this.showTextToolbar(quill, range, textToolbar, imageToolbar);
     } else {
       this.hideAllToolbars(textToolbar, imageToolbar);
     }
@@ -45,7 +41,7 @@ export class QuillToolbarService {
   }
 
   showImageToolbar(
-    quillInstance: Quill,
+    quill: Quill,
     image: HTMLImageElement, 
     imageToolbar: HTMLElement, 
     textToolbar: HTMLElement
@@ -56,11 +52,10 @@ export class QuillToolbarService {
 
     image.classList.add('selected-image');
     this.selectedImage = image;
-
     textToolbar.style.display = 'none';
 
     const bounds = image.getBoundingClientRect();
-    const editorBounds = quillInstance.container.getBoundingClientRect();
+    const editorBounds = quill.container.getBoundingClientRect();
 
     const toolbarBounds: ToolbarBounds = {
       top: bounds.top - editorBounds.top + window.scrollY,
@@ -69,18 +64,18 @@ export class QuillToolbarService {
       height: bounds.height
     };
 
-    this.updateToolbarPosition(imageToolbar, toolbarBounds, quillInstance.container);
+    this.updateToolbarPosition(imageToolbar, toolbarBounds, quill.container);
   }
 
   showTextToolbar(
-    quillInstance: Quill,
+    quill: Quill,
     range: QuillRange,
     textToolbar: HTMLElement,
     imageToolbar: HTMLElement
   ) {
     imageToolbar.style.display = 'none';
 
-    const bounds = quillInstance.getBounds(range.index, range.length);
+    const bounds = quill.getBounds(range.index, range.length);
     if (!bounds) {
       this.hideAllToolbars(textToolbar, imageToolbar);
       return;
@@ -93,7 +88,7 @@ export class QuillToolbarService {
       height: bounds.height
     };
 
-    this.updateToolbarPosition(textToolbar, toolbarBounds, quillInstance.container);
+    this.updateToolbarPosition(textToolbar, toolbarBounds, quill.container);
   }
 
   updateToolbarPosition(toolbar: HTMLElement, bounds: ToolbarBounds, editorContainer: HTMLElement) {
@@ -109,4 +104,8 @@ export class QuillToolbarService {
 
     toolbar.style.left = `${leftPosition}px`;
   }
-}
+
+  getSelectedImage(): HTMLImageElement | null {
+    return this.selectedImage;
+  }
+} 

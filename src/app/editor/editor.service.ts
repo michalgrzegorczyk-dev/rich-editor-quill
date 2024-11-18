@@ -1,270 +1,45 @@
-import { Injectable, NgZone, ApplicationRef, ComponentRef, createComponent, EmbeddedViewRef, Injector } from '@angular/core';
-import { SlashMenuComponent } from './slash-menu/slash-menu.component';
+import { Injectable } from '@angular/core';
 import Quill from 'quill';
-import { QuillRange } from './models/quill-range.model';
-import { QuillToolbarService } from './quill-toolbar.service';
+import { QuillBlotService } from './services/quill-blot.service';
+import { QuillKeyboardService } from './services/quill-keyboard.service';
+import { QuillSlashMenuService } from './services/quill-slash-menu.service';
+import { QuillImageService } from './services/quill-image.service';
+import { QuillConfigService } from './services/quill-config.service';
+import { QuillEventsService } from './services/quill-events.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class QuillService {
   private quillInstance!: Quill;
-  private slashMenuRef: ComponentRef<SlashMenuComponent> | null = null;
-  private textToolbarRef!: HTMLElement;
-  private imageToolbarRef!: HTMLElement;
 
   constructor(
-    private ngZone: NgZone,
-    private appRef: ApplicationRef,
-    private injector: Injector,
-    private quillToolbarService: QuillToolbarService
+    private quillBlotService: QuillBlotService,
+    private quillKeyboardService: QuillKeyboardService,
+    private quillSlashMenuService: QuillSlashMenuService,
+    private quillImageService: QuillImageService,
+    private quillConfigService: QuillConfigService,
+    private quillEventsService: QuillEventsService
   ) {}
 
   initialize(editorElement: HTMLElement, textToolbar: HTMLElement, imageToolbar: HTMLElement) {
-    this.textToolbarRef = textToolbar;
-    this.imageToolbarRef = imageToolbar;
-    
-    this.registerCustomBlots();
+    this.quillBlotService.registerCustomBlots();
     this.initializeQuill(editorElement, textToolbar);
     
-    this.quillInstance.on('selection-change', (range: QuillRange | null) => {
-      this.ngZone.runOutsideAngular(() => {
-        requestAnimationFrame(() => {
-          this.quillToolbarService.updateToolbarVisibility(this.quillInstance, range, textToolbar, imageToolbar);
-        });
-      });
-    });
-
-    this.quillInstance.root.addEventListener('click', (event) => {
-      const target = event.target as HTMLElement;
-      
-      if (target.tagName === 'IMG') {
-        this.quillInstance.setSelection(null);
-        
-        this.ngZone.runOutsideAngular(() => {
-          requestAnimationFrame(() => {
-            const image = target as HTMLImageElement;
-            this.quillToolbarService.showImageToolbar(this.quillInstance, image, imageToolbar, textToolbar);
-          });
-        });
-      }
-    });
+    this.quillSlashMenuService.initialize(this.quillInstance);
+    this.quillImageService.initialize(this.quillInstance);
+    this.quillEventsService.initialize(this.quillInstance);
+    
+    this.quillEventsService.setupEventListeners(textToolbar, imageToolbar);
 
     return this.quillInstance;
   }
   
-  private registerCustomBlots() {
-    const Block = Quill.import('blots/block') as any;
-
-    class BlockDiv extends Block {
-      static create(value: any) {
-        const node = super.create(value);
-        node.setAttribute('class', 'block');
-        
-        node.setAttribute('data-placeholder', 'Type "/" to run commands');
-        return node;
-      }
-
-      static formats(node: HTMLElement) {
-        return node.classList.contains('block') ? true : undefined;
-      }
-
-      static blotName = 'block-div';
-      static tagName = 'div';
-      static className = 'block';
-    }
-
-    Quill.register(BlockDiv, true);
-  }
-
   private initializeQuill(editorElement: HTMLElement, toolbar: HTMLElement) {
-    const options = {
-      theme: 'snow',
-      modules: {
-        toolbar: toolbar,
-        keyboard: {
-          bindings: {
-            enter: {
-              key: 13,
-              handler: this.handleEnterKey.bind(this)
-            },
-            slash: {
-              key: 191,
-              handler: () => {
-
-                requestAnimationFrame(() => {
-                  const selection = this.quillInstance.getSelection();
-                  if (!selection) return true;
-  
-                  console.log(selection);
-  
-                  const [line] = this.quillInstance.getLine(selection.index);
-                  if (!line || !line.domNode) return true;
-  
-                  console.log('line', line);
-  
-                  const text = line.domNode.textContent || '';
-                  
-                  console.log('tex',text);
-  
-                  if (text === '/') {
-                    console.log('slash');
-                    const bounds:any = this.quillInstance.getBounds(selection.index, 1);
-                    this.showSlashMenu(bounds, selection.index);
-                    return false;
-                  }
-                  return true;
-                });
-                
-                return true;
-              }
-            }
-          }
-        }
-      },
-      formats: ['block-div', 'image', 'header', 'bold', 'italic', 'underline', 'code-block']
-    };
-
+    const options = this.quillConfigService.getEditorConfig(toolbar);
     this.quillInstance = new Quill(editorElement, options);
-
-    this.quillInstance.setContents([
-      { 
-        insert: 'xxxxxxxxxxxx xxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxx\n',
-        attributes: { 'block-div': true }
-      }
-    ]);
-
+    this.quillKeyboardService.initialize(this.quillInstance);
+    this.quillInstance.setContents(this.quillConfigService.getInitialContent());
     return this.quillInstance;
-  }
-
-  private handleEnterKey(range: QuillRange): boolean {
-    const currentSelection = this.quillInstance.getSelection();
-    if (!currentSelection) return true;
-
-    const [block, offset] = this.quillInstance.getLine(currentSelection.index);
-    if (!block) return true;
-
-    const blockLength = block.length();
-    const blockIndex = this.quillInstance.getIndex(block);
-
-    if (offset === blockLength) {
-      this.quillInstance.insertText(blockIndex + blockLength, '\n');
-      this.quillInstance.formatLine(blockIndex + blockLength + 1, 1, 'block-div', true);
-      const [newBlock] = this.quillInstance.getLine(blockIndex + blockLength + 1);
-      if (newBlock && newBlock.domNode) {
-        newBlock.domNode.setAttribute('data-placeholder', 'Type "/" to run commands');
-      }
-      this.quillInstance.setSelection(blockIndex + blockLength + 1, 0);
-    } else {
-      const textContent = block.domNode.textContent || '';
-      const remainingText = textContent.slice(offset);
-      
-      this.quillInstance.deleteText(currentSelection.index, remainingText.length);
-      this.quillInstance.insertText(blockIndex + offset, '\n');
-      this.quillInstance.insertText(blockIndex + offset + 1, remainingText);
-      this.quillInstance.formatLine(blockIndex + offset + 1, remainingText.length + 1, 'block-div', true);
-      const [newBlock] = this.quillInstance.getLine(blockIndex + offset + 1);
-      if (newBlock && newBlock.domNode) {
-        newBlock.domNode.setAttribute('data-placeholder', 'Type "/" to run commands');
-      }
-      this.quillInstance.setSelection(blockIndex + offset + 1, 0);
-    }
-
-    return false;
-  }
-
-  deleteImage() {
-    const selectedImage = this.quillToolbarService.getSelectedImage();
-    if (selectedImage) {
-      const blocks = this.quillInstance.scroll.descendants(
-        (blot: any) => blot.domNode === selectedImage
-      );
-      
-      if (blocks.length > 0) {
-        const blot = blocks[0];
-        const index = this.quillInstance.getIndex(blot);
-        
-        this.quillInstance.deleteText(index, 1);
-        
-        this.quillToolbarService.hideAllToolbars(this.textToolbarRef, this.imageToolbarRef);
-      }
-    }
-  }
-
-  private showSlashMenu(bounds: any, index: number) {
-    this.hideSlashMenu();
-
-    const componentRef = createComponent(SlashMenuComponent, {
-      environmentInjector: this.appRef.injector,
-      elementInjector: this.injector
-    });
-    
-    componentRef.instance.setPosition({
-      top: bounds.top + bounds.height,
-      left: bounds.left
-    });
-
-    const domElem = (componentRef.hostView as EmbeddedViewRef<any>).rootNodes[0];
-    this.quillInstance.container.appendChild(domElem);
-
-    componentRef.changeDetectorRef.detectChanges();
-
-    let lastKnownSelection = this.quillInstance.getSelection();
-
-    const textChangeHandler = () => {
-      const selection = this.quillInstance.getSelection();
-      if (!selection) return;
-
-      lastKnownSelection = selection;
-      const [line] = this.quillInstance.getLine(selection.index);
-      if (!line) return;
-
-      const text = line.domNode.textContent || '';
-      
-      if (!text.includes('/')) {
-        this.quillInstance.off('text-change', textChangeHandler);
-        this.hideSlashMenu();
-        return;
-      }
-
-      componentRef.instance.filter = text;
-      componentRef.changeDetectorRef.detectChanges();
-    };
-
-    this.quillInstance.on('text-change', textChangeHandler);
-
-    const subscription = componentRef.instance.optionSelected.subscribe((option: string) => {
-      if (lastKnownSelection) {
-        const [line] = this.quillInstance.getLine(lastKnownSelection.index);
-        if (line) {
-          const lineIndex = this.quillInstance.getIndex(line);
-          const lineLength = line.length();
-          
-          this.quillInstance.deleteText(lineIndex, lineLength);
-          
-          this.quillInstance.insertText(lineIndex, option);
-          this.quillInstance.formatLine(lineIndex, option.length, 'block-div', true);
-          
-          this.quillInstance.setSelection(lineIndex + option.length, 0);
-        }
-      }
-    
-      this.quillInstance.off('text-change', textChangeHandler);
-      subscription.unsubscribe();
-      this.hideSlashMenu();
-    });
-
-    this.slashMenuRef = componentRef;
-  }
-
-  private hideSlashMenu() {
-    if (this.slashMenuRef) {
-      const domElem = (this.slashMenuRef.hostView as EmbeddedViewRef<any>).rootNodes[0];
-      if (domElem.parentNode) {
-        domElem.parentNode.removeChild(domElem);
-      }
-      this.slashMenuRef.destroy();
-      this.slashMenuRef = null;
-    }
   }
 }

@@ -1,10 +1,12 @@
 import { Component, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
-import Quill from 'quill';
 import { QuillService } from './editor.service';
+import { QuillImageService } from './services/quill-image.service';
+import { SlashMenuComponent } from './features/slash-menu/slash-menu.component';
 
 @Component({
   selector: 'app-quill-editor',
   standalone: true,
+  imports: [SlashMenuComponent],
   template: `
     <div class="editor-container">
       <div #textToolbar class="floating-toolbar ql-toolbar ql-snow">
@@ -34,14 +36,17 @@ import { QuillService } from './editor.service';
       <div #editor></div>
     </div>
   `,
-  styleUrls: ['./editor.component.css']
+  styleUrls: ['./editor.component.scss']
 })
 export class QuillEditorComponent implements AfterViewInit {
   @ViewChild('editor') private editorElement!: ElementRef;
   @ViewChild('textToolbar') private textToolbar!: ElementRef;
   @ViewChild('imageToolbar') private imageToolbar!: ElementRef;
 
-  constructor(private quillService: QuillService) {}
+  constructor(
+    private quillService: QuillService,
+    private quillImageService: QuillImageService
+  ) {}
 
   ngAfterViewInit() {
     this.quillService.initialize(
@@ -52,9 +57,13 @@ export class QuillEditorComponent implements AfterViewInit {
   }
 
   resizeImage(size: 'small' | 'medium' | 'large') {
+    this.quillImageService.resizeImage(size);
   }
 
   deleteImage() {
-    this.quillService.deleteImage();
+    this.quillImageService.deleteImage(
+      this.textToolbar.nativeElement,
+      this.imageToolbar.nativeElement
+    );
   }
 }
