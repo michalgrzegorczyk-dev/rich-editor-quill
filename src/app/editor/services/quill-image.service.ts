@@ -7,7 +7,6 @@ import { QuillToolbarService } from './quill-toolbar.service';
 })
 export class QuillImageService {
   private quillInstance!: Quill;
-  private selectedImage: HTMLImageElement | null = null;
 
   constructor(private quillToolbarService: QuillToolbarService) {}
 
