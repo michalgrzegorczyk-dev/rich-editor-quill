@@ -19,6 +19,7 @@ export interface ToolbarBounds {
 export class QuillService {
   private quillInstance!: Quill;
   private selectionState: 'text' | 'image' | 'none' = 'none';
+  private selectedImage: HTMLImageElement | null = null;  // Add this line
 
   initialize(editorElement: HTMLElement, textToolbar: HTMLElement, imageToolbar: HTMLElement) {
     this.registerCustomBlots();
@@ -56,6 +57,10 @@ export class QuillService {
   }
 
   private hideAllToolbars(textToolbar: HTMLElement, imageToolbar: HTMLElement) {
+    if (this.selectedImage) {
+      this.selectedImage.classList.remove('selected-image');
+      this.selectedImage = null;
+    }
     textToolbar.style.display = 'none';
     imageToolbar.style.display = 'none';
     this.selectionState = 'none';
@@ -66,6 +71,15 @@ export class QuillService {
     imageToolbar: HTMLElement, 
     textToolbar: HTMLElement
   ) {
+
+    if (this.selectedImage) {
+      this.selectedImage.classList.remove('selected-image');
+    }
+
+    image.classList.add('selected-image');
+    this.selectedImage = image;
+
+
     // Hide text toolbar
     textToolbar.style.display = 'none';
 

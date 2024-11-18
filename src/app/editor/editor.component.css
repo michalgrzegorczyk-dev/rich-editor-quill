@@ -53,3 +53,9 @@
 :host ::ng-deep .ql-toolbar.ql-snow:not(.floating-toolbar) {
   display: none;
 }
+
+:host ::ng-deep .selected-image {
+  border: 2px solid #06c;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px #fff, 0 0 0 3px #06c;
+}
