@@ -133,19 +133,24 @@ export class QuillService {
     class BlockDiv extends Block {
       static create(value: any) {
         const node = super.create(value);
-        node.classList.add('block');
+        node.setAttribute('class', 'block');
         return node;
+      }
+
+      static formats(node: HTMLElement) {
+        return node.classList.contains('block') ? true : undefined;
       }
 
       static blotName = 'block-div';
       static tagName = 'div';
+      static className = 'block';
     }
 
-    Quill.register('formats/block-div', BlockDiv);
+    Quill.register(BlockDiv, true);
   }
 
   private initializeQuill(editorElement: HTMLElement, toolbar: HTMLElement) {
-    this.quillInstance = new Quill(editorElement, {
+    const options = {
       theme: 'snow',
       modules: {
         toolbar: toolbar,
@@ -159,11 +164,14 @@ export class QuillService {
         }
       },
       formats: ['block-div', 'image', 'header', 'bold', 'italic', 'underline', 'code-block']
-    });
+    };
 
-    this.quillInstance.setContents([
-      { insert: 'Press Enter to create new blocks...', attributes: { 'block-div': true } }
-    ]);
+    this.quillInstance = new Quill(editorElement, options);
+
+    this.quillInstance.clipboard.dangerouslyPasteHTML(
+      0, 
+      '<div class="block">Press Enter to create new blocks...</div>'
+    );
 
     return this.quillInstance;
   }
@@ -173,20 +181,23 @@ export class QuillService {
     if (!currentSelection) return true;
 
     const [block, offset] = this.quillInstance.getLine(currentSelection.index);
-
     if (!block) return true;
 
     const blockLength = block.length();
     const blockIndex = this.quillInstance.getIndex(block);
 
     if (offset === blockLength) {
-      this.quillInstance.insertText(blockIndex + blockLength, '\n', { 'block-div': true });
+      this.quillInstance.insertText(blockIndex + blockLength, '\n');
+      this.quillInstance.formatLine(blockIndex + blockLength + 1, 1, 'block-div', true);
       this.quillInstance.setSelection(blockIndex + blockLength + 1, 0);
     } else {
       const textContent = block.domNode.textContent || '';
       const remainingText = textContent.slice(offset);
+      
       this.quillInstance.deleteText(currentSelection.index, remainingText.length);
-      this.quillInstance.insertText(blockIndex + offset + 1, remainingText + '\n', { 'block-div': true });
+      this.quillInstance.insertText(blockIndex + offset, '\n');
+      this.quillInstance.insertText(blockIndex + offset + 1, remainingText);
+      this.quillInstance.formatLine(blockIndex + offset + 1, remainingText.length + 1, 'block-div', true);
       this.quillInstance.setSelection(blockIndex + offset + 1, 0);
     }
 

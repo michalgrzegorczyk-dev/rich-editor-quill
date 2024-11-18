@@ -5,3 +5,15 @@
   .ql-editor img.ql-selected {
     box-shadow: 0 0 0 2px #06c;
   }
+
+  .ql-editor .block {
+    margin-bottom: 1em;
+    padding: 0.5em;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+
+  .ql-editor .block:focus {
+    border-color: #06c;
+    outline: none;
+  }
