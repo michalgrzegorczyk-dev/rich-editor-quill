@@ -6,6 +6,7 @@ import { QuillSlashMenuService } from './services/quill-slash-menu.service';
 import { QuillImageService } from './services/quill-image.service';
 import { QuillConfigService } from './services/quill-config.service';
 import { QuillEventsService } from './services/quill-events.service';
+import { QuillToolbarService } from './services/quill-toolbar.service';
 
 @Injectable({
   providedIn: 'root'
@@ -19,10 +20,11 @@ export class QuillService {
     private quillSlashMenuService: QuillSlashMenuService,
     private quillImageService: QuillImageService,
     private quillConfigService: QuillConfigService,
-    private quillEventsService: QuillEventsService
+    private quillEventsService: QuillEventsService,
+    private quillToolbarService: QuillToolbarService
   ) {}
 
-  initialize(editorElement: HTMLElement, textToolbar: HTMLElement, imageToolbar: HTMLElement) {
+  initialize(editorElement: HTMLElement, textToolbar: HTMLElement) {
     this.quillBlotService.registerCustomBlots();
     this.initializeQuill(editorElement, textToolbar);
     
@@ -30,7 +32,7 @@ export class QuillService {
     this.quillImageService.initialize(this.quillInstance);
     this.quillEventsService.initialize(this.quillInstance);
     
-    this.quillEventsService.setupEventListeners(textToolbar, imageToolbar);
+    this.quillEventsService.setupEventListeners(textToolbar);
 
     return this.quillInstance;
   }

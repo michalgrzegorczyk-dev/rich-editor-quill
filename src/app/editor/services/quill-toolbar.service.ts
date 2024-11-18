@@ -1,13 +1,24 @@
-import { Injectable } from '@angular/core';
+import { Injectable, ComponentRef, createComponent, ApplicationRef, Injector, Type } from '@angular/core';
 import Quill from 'quill';
 import { QuillRange } from '../models/quill-range.model';
 import { ToolbarBounds } from '../models/toolbar-bounds.model';
+import { ImageToolbarComponent } from '../components/image-toolbar.component';
 
 @Injectable({
   providedIn: 'root'
 })
 export class QuillToolbarService {
   private selectedImage: HTMLImageElement | null = null;
+  private activeToolbarRef: ComponentRef<any> | null = null;
+
+  private toolbarMap: Record<string, Type<any>> = {
+    'img': ImageToolbarComponent,
+  };
+
+  constructor(
+    private appRef: ApplicationRef,
+    private injector: Injector
+  ) {}
 
   updateToolbarVisibility(
     quill: Quill,
@@ -89,6 +100,47 @@ export class QuillToolbarService {
     };
 
     this.updateToolbarPosition(textToolbar, toolbarBounds, quill.container);
+  }
+
+  showToolbar2(type: string, bounds?: { top: number; left: number }) {
+    this.hideActiveToolbar();
+    
+    const ToolbarComponent = this.toolbarMap[type];
+    if (!ToolbarComponent) {
+      console.error(`No toolbar component found for type: ${type}`);
+      return;
+    }
+
+    const componentRef = createComponent(ToolbarComponent, {
+      environmentInjector: this.appRef.injector,
+      elementInjector: this.injector
+    });
+
+    if (bounds) {
+      componentRef.instance.position = {
+        top: bounds.top - 50, // Offset to show above the image
+        left: bounds.left
+      };
+    }
+
+    // Add to DOM
+    const domElem = componentRef.location.nativeElement;
+    document.body.appendChild(domElem);
+
+    // Store reference for cleanup
+    this.activeToolbarRef = componentRef;
+    componentRef.changeDetectorRef.detectChanges();
+  }
+
+  hideActiveToolbar() {
+    if (this.activeToolbarRef) {
+      const element = this.activeToolbarRef.location.nativeElement;
+      if (element.parentNode) {
+        element.parentNode.removeChild(element);
+      }
+      this.activeToolbarRef.destroy();
+      this.activeToolbarRef = null;
+    }
   }
 
   updateToolbarPosition(toolbar: HTMLElement, bounds: ToolbarBounds, editorContainer: HTMLElement) {

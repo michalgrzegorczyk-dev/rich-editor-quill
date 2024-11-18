@@ -14,17 +14,7 @@ export class QuillImageService {
     this.quillInstance = quill;
   }
 
-  handleImageClick(event: Event, imageToolbar: HTMLElement, textToolbar: HTMLElement) {
-    const target = event.target as HTMLElement;
-    
-    if (target.tagName === 'IMG') {
-      this.quillInstance.setSelection(null);
-      const image = target as HTMLImageElement;
-      this.quillToolbarService.showImageToolbar(this.quillInstance, image, imageToolbar, textToolbar);
-    }
-  }
-
-  deleteImage(textToolbar: HTMLElement, imageToolbar: HTMLElement) {
+  deleteImage() {
     const selectedImage = this.quillToolbarService.getSelectedImage();
     if (selectedImage) {
       const blocks = this.quillInstance.scroll.descendants(
@@ -34,14 +24,26 @@ export class QuillImageService {
       if (blocks.length > 0) {
         const blot = blocks[0];
         const index = this.quillInstance.getIndex(blot);
-        
         this.quillInstance.deleteText(index, 1);
-        this.quillToolbarService.hideAllToolbars(textToolbar, imageToolbar);
+        this.quillToolbarService.hideActiveToolbar();
       }
     }
   }
 
   resizeImage(size: 'small' | 'medium' | 'large') {
-    // Implement image resizing logic here
+    const selectedImage = this.quillToolbarService.getSelectedImage();
+    if (selectedImage) {
+      switch (size) {
+        case 'small':
+          selectedImage.style.width = '25%';
+          break;
+        case 'medium':
+          selectedImage.style.width = '50%';
+          break;
+        case 'large':
+          selectedImage.style.width = '100%';
+          break;
+      }
+    }
   }
 } 

@@ -27,12 +27,6 @@ import { SlashMenuComponent } from './features/slash-menu/slash-menu.component';
           <button class="ql-code-block"></button>
         </span>
       </div>
-      <div #imageToolbar class="floating-toolbar image-toolbar">
-        <button (click)="resizeImage('small')">Small</button>
-        <button (click)="resizeImage('medium')">Medium</button>
-        <button (click)="resizeImage('large')">Large</button>
-        <button (click)="deleteImage()">Delete</button>
-      </div>
       <div #editor></div>
     </div>
   `,
@@ -41,7 +35,6 @@ import { SlashMenuComponent } from './features/slash-menu/slash-menu.component';
 export class QuillEditorComponent implements AfterViewInit {
   @ViewChild('editor') private editorElement!: ElementRef;
   @ViewChild('textToolbar') private textToolbar!: ElementRef;
-  @ViewChild('imageToolbar') private imageToolbar!: ElementRef;
 
   constructor(
     private quillService: QuillService,
@@ -51,19 +44,7 @@ export class QuillEditorComponent implements AfterViewInit {
   ngAfterViewInit() {
     this.quillService.initialize(
       this.editorElement.nativeElement,
-      this.textToolbar.nativeElement,
-      this.imageToolbar.nativeElement
-    );
-  }
-
-  resizeImage(size: 'small' | 'medium' | 'large') {
-    this.quillImageService.resizeImage(size);
-  }
-
-  deleteImage() {
-    this.quillImageService.deleteImage(
-      this.textToolbar.nativeElement,
-      this.imageToolbar.nativeElement
+      this.textToolbar.nativeElement
     );
   }
 }
