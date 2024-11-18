@@ -1,11 +1,10 @@
-<div class="slash-popup" 
-     [style.top.px]="menuPosition().top" 
-     [style.left.px]="menuPosition().left"
-     [style.position]="'absolute'"
-     [style.zIndex]="9999">
-  <div *ngFor="let option of filteredOptions()" 
-       class="slash-item"
-       (mousedown)="onOptionSelect(option)">
-    {{ option }}
-  </div>
-</div> 
+<div class="slash-popup"
+     [style.top.px]="menuPosition().top"
+     [style.left.px]="menuPosition().left">
+  @for (option of filteredOptions(); track option) {
+    <div class="slash-item" 
+         (click)="onOptionSelect(option)">
+      {{ option }}
+    </div>
+  }
+</div>
