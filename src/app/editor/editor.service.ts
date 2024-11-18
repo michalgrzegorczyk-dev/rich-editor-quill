@@ -44,11 +44,8 @@ export class QuillService {
       const target = event.target as HTMLElement;
       
       if (target.tagName === 'IMG') {
-        
-        // First clear any existing selection
         this.quillInstance.setSelection(null);
         
-        // Use requestAnimationFrame to ensure DOM updates are complete
         this.ngZone.runOutsideAngular(() => {
           requestAnimationFrame(() => {
             const image = target as HTMLImageElement;
@@ -213,7 +210,6 @@ export class QuillService {
 
     this.quillInstance = new Quill(editorElement, options);
 
-    // Add initial content with block-div format
     this.quillInstance.setContents([
       { 
         insert: 'xxxxxxxxxxxx xxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxx\n',
@@ -280,39 +276,57 @@ export class QuillService {
       elementInjector: this.injector
     });
 
+    const allOptions = ['Option 1', 'Option 2'];
+    
     componentRef.instance.top = bounds.top + bounds.height;
     componentRef.instance.left = bounds.left;
-    componentRef.instance.options = ['Option 1', 'Option 2'];
+    componentRef.instance.options = allOptions;
 
     const domElem = (componentRef.hostView as EmbeddedViewRef<any>).rootNodes[0];
     this.quillInstance.container.appendChild(domElem);
 
     componentRef.changeDetectorRef.detectChanges();
 
-    // Handle option selection
+    // Listen to text changes to filter options
+    const textChangeHandler = () => {
+      const selection = this.quillInstance.getSelection();
+      if (!selection) return;
+
+      const [line] = this.quillInstance.getLine(selection.index);
+      if (!line) return;
+
+      const text = line.domNode.textContent || '';
+      const query = text.slice(1).toLowerCase(); // Remove the "/" and convert to lowercase
+      
+      const filteredOptions = allOptions.filter(option => 
+        option.toLowerCase().includes(query)
+      );
+      
+      componentRef.instance.options = filteredOptions;
+      componentRef.changeDetectorRef.detectChanges();
+    };
+
+    this.quillInstance.on('text-change', textChangeHandler);
+
     const subscription = componentRef.instance.optionSelected.subscribe((option: string) => {
       console.log('Service received:', option);
       
-      // Get the current selection and line
       const currentSelection = this.quillInstance.getSelection();
       if (currentSelection) {
         const [line] = this.quillInstance.getLine(currentSelection.index);
         if (line) {
           const lineIndex = this.quillInstance.getIndex(line);
+          const text = line.domNode.textContent || '';
           
-          // Delete the slash and insert "done" in one operation
-
-          
-          // Set the cursor after "done"
           requestAnimationFrame(() => {
-            this.quillInstance.deleteText(lineIndex, 1);
+            this.quillInstance.deleteText(lineIndex, text.length); // Delete entire text
             this.quillInstance.insertText(lineIndex, 'done');
             this.quillInstance.setSelection(lineIndex + 4, 0);
           });
         }
       }
       
-      // Clean up
+      this.quillInstance.off('text-change', textChangeHandler); // Remove listener
       subscription.unsubscribe();
       componentRef.destroy();
       if (domElem.parentNode) {
@@ -321,19 +335,9 @@ export class QuillService {
       this.slashMenuRef = null;
     });
 
-    // Handle clicks outside
     const closeHandler = (e: MouseEvent) => {
       if (!domElem.contains(e.target as Node)) {
-        // First remove the slash
-        const currentSelection = this.quillInstance.getSelection();
-        if (currentSelection) {
-          const [line] = this.quillInstance.getLine(currentSelection.index);
-          if (line) {
-            const lineIndex = this.quillInstance.getIndex(line);
-            // this.quillInstance.deleteText(lineIndex, 1);
-          }
-        }
-
+        this.quillInstance.off('text-change', textChangeHandler); // Remove listener
         subscription.unsubscribe();
         componentRef.destroy();
         if (domElem.parentNode) {
