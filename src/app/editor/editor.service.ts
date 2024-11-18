@@ -2,7 +2,6 @@ import { Injectable, NgZone, ApplicationRef, ComponentRef, createComponent, Embe
 import { SlashMenuComponent } from './slash-menu/slash-menu.component';
 import Quill from 'quill';
 import { QuillRange } from './models/quill-range.model';
-import { ToolbarBounds } from './models/toolbar-bounds.model';
 import { QuillToolbarService } from './quill-toolbar.service';
 
 @Injectable({
@@ -10,7 +9,6 @@ import { QuillToolbarService } from './quill-toolbar.service';
 })
 export class QuillService {
   private quillInstance!: Quill;
-  private selectedImage: HTMLImageElement | null = null;
   private slashMenuRef: ComponentRef<SlashMenuComponent> | null = null;
   private textToolbarRef!: HTMLElement;
   private imageToolbarRef!: HTMLElement;
@@ -32,7 +30,6 @@ export class QuillService {
     this.quillInstance.on('selection-change', (range: QuillRange | null) => {
       this.ngZone.runOutsideAngular(() => {
         requestAnimationFrame(() => {
-          // this.updateToolbarVisibility(range, textToolbar, imageToolbar);
           this.quillToolbarService.updateToolbarVisibility(this.quillInstance, range, textToolbar, imageToolbar);
         });
       });
@@ -55,87 +52,7 @@ export class QuillService {
 
     return this.quillInstance;
   }
-
-  // private updateToolbarVisibility(
-  //   range: QuillRange | null, 
-  //   textToolbar: HTMLElement, 
-  //   imageToolbar: HTMLElement
-  // ) {
-  //   if (!range) {
-  //     this.hideAllToolbars(textToolbar, imageToolbar);
-  //     return;
-  //   }
-
-  //   const [leaf] = this.quillInstance.getLeaf(range.index);
-    
-  //   if (leaf?.domNode instanceof HTMLImageElement && range.length === 0) {
-  //     this.showImageToolbar(leaf.domNode, imageToolbar, textToolbar);
-  //   } else if (range.length > 0) {
-  //     this.showTextToolbar(range, textToolbar, imageToolbar);
-  //   } else {
-  //     this.hideAllToolbars(textToolbar, imageToolbar);
-  //   }
-  // }
-
-  private hideAllToolbars(textToolbar: HTMLElement, imageToolbar: HTMLElement) {
-    if (this.selectedImage) {
-      this.selectedImage.classList.remove('selected-image');
-      this.selectedImage = null;
-    }
-    textToolbar.style.display = 'none';
-    imageToolbar.style.display = 'none';
-  }
-
-  private showImageToolbar(
-    image: HTMLImageElement, 
-    imageToolbar: HTMLElement, 
-    textToolbar: HTMLElement
-  ) {
-    if (this.selectedImage) {
-      this.selectedImage.classList.remove('selected-image');
-    }
-
-    image.classList.add('selected-image');
-    this.selectedImage = image;
-
-    textToolbar.style.display = 'none';
-
-    const bounds = image.getBoundingClientRect();
-    const editorBounds = this.quillInstance.container.getBoundingClientRect();
-
-    const toolbarBounds: ToolbarBounds = {
-      top: bounds.top - editorBounds.top + window.scrollY,
-      left: bounds.left - editorBounds.left,
-      width: bounds.width,
-      height: bounds.height
-    };
-
-    this.updateToolbarPosition(imageToolbar, toolbarBounds, this.quillInstance.container);
-  }
-
-  // private showTextToolbar(
-  //   range: QuillRange,
-  //   textToolbar: HTMLElement,
-  //   imageToolbar: HTMLElement
-  // ) {
-  //   imageToolbar.style.display = 'none';
-
-  //   const bounds = this.quillInstance.getBounds(range.index, range.length);
-  //   if (!bounds) {
-  //     this.hideAllToolbars(textToolbar, imageToolbar);
-  //     return;
-  //   }
-
-  //   const toolbarBounds: ToolbarBounds = {
-  //     top: bounds.top,
-  //     left: bounds.left,
-  //     width: bounds.width,
-  //     height: bounds.height
-  //   };
-
-  //   this.updateToolbarPosition(textToolbar, toolbarBounds, this.quillInstance.container);
-  // }
-
+  
   private registerCustomBlots() {
     const Block = Quill.import('blots/block') as any;
 
@@ -254,23 +171,6 @@ export class QuillService {
     }
 
     return false;
-  }
-
-  updateToolbarPosition(toolbar: HTMLElement, bounds: ToolbarBounds, editorContainer: HTMLElement) {
-    toolbar.style.display = 'block';
-    toolbar.style.top = `${bounds.top - toolbar.offsetHeight - 10}px`;
-
-    let leftPosition = bounds.left + bounds.width / 2 - toolbar.offsetWidth / 2;
-
-    const editorRect = editorContainer.getBoundingClientRect();
-    const minLeft = 0;
-    const maxLeft = editorRect.width - toolbar.offsetWidth;
-    leftPosition = Math.max(minLeft, Math.min(leftPosition, maxLeft));
-
-    toolbar.style.left = `${leftPosition}px`;
-  }
-
-  resizeImage(size: 'small' | 'medium' | 'large') {
   }
 
   deleteImage() {

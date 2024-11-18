@@ -1,12 +1,10 @@
 import { Component, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
 import Quill from 'quill';
 import { QuillService } from './editor.service';
-import { SlashMenuComponent } from './slash-menu/slash-menu.component';
 
 @Component({
   selector: 'app-quill-editor',
   standalone: true,
-  imports: [SlashMenuComponent],
   template: `
     <div class="editor-container">
       <div #textToolbar class="floating-toolbar ql-toolbar ql-snow">
@@ -54,7 +52,6 @@ export class QuillEditorComponent implements AfterViewInit {
   }
 
   resizeImage(size: 'small' | 'medium' | 'large') {
-    this.quillService.resizeImage(size);
   }
 
   deleteImage() {
