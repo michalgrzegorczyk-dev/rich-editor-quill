@@ -287,7 +287,7 @@ export class QuillService {
 
     componentRef.changeDetectorRef.detectChanges();
 
-    // Handle text changes for filtering
+    // Updated text change handler
     const textChangeHandler = () => {
       const selection = this.quillInstance.getSelection();
       if (!selection) return;
@@ -296,6 +296,14 @@ export class QuillService {
       if (!line) return;
 
       const text = line.domNode.textContent || '';
+      
+      // Hide menu if slash is removed
+      if (!text.includes('/')) {
+        this.quillInstance.off('text-change', textChangeHandler);
+        this.hideSlashMenu();
+        return;
+      }
+
       componentRef.instance.filter = text;
     };
 

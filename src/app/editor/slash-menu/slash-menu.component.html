@@ -1,10 +1,5 @@
-<div class="slash-popup"
-     [style.top.px]="menuPosition().top"
-     [style.left.px]="menuPosition().left">
+<div class="slash-popup"[style.top.px]="menuPosition().top" [style.left.px]="menuPosition().left">
   @for (option of filteredOptions(); track option) {
-    <div class="slash-item" 
-         (click)="onOptionSelect(option)">
-      {{ option }}
-    </div>
+    <div class="slash-item" (click)="onOptionSelect(option)">{{ option }}</div>
   }
 </div>
