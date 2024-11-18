@@ -1,18 +1,8 @@
 import { Injectable, NgZone, ApplicationRef, ComponentRef, createComponent, EmbeddedViewRef, Injector } from '@angular/core';
 import { SlashMenuComponent } from './slash-menu/slash-menu.component';
 import Quill from 'quill';
-
-export interface QuillRange {
-  index: number;
-  length: number;
-}
-
-export interface ToolbarBounds {
-  top: number;
-  left: number;
-  width: number;
-  height: number;
-}
+import { QuillRange } from './models/quill-range.model';
+import { ToolbarBounds } from './models/toolbar-bounds.model';
 
 @Injectable({
   providedIn: 'root'
@@ -290,14 +280,11 @@ export class QuillService {
         const blot = blocks[0];
         const index = this.quillInstance.getIndex(blot);
         
-        // Delete the image
         this.quillInstance.deleteText(index, 1);
         
-        // Clear the selected image reference
         this.selectedImage.classList.remove('selected-image');
         this.selectedImage = null;
 
-        // Hide toolbars using stored references
         this.hideAllToolbars(this.textToolbarRef, this.imageToolbarRef);
       }
     }
@@ -321,14 +308,13 @@ export class QuillService {
 
     componentRef.changeDetectorRef.detectChanges();
 
-    // Store initial selection
     let lastKnownSelection = this.quillInstance.getSelection();
 
     const textChangeHandler = () => {
       const selection = this.quillInstance.getSelection();
       if (!selection) return;
 
-      lastKnownSelection = selection; // Update last known selection
+      lastKnownSelection = selection;
       const [line] = this.quillInstance.getLine(selection.index);
       if (!line) return;
 
@@ -347,26 +333,21 @@ export class QuillService {
     this.quillInstance.on('text-change', textChangeHandler);
 
     const subscription = componentRef.instance.optionSelected.subscribe((option: string) => {
-      // Use the last known selection
       if (lastKnownSelection) {
         const [line] = this.quillInstance.getLine(lastKnownSelection.index);
         if (line) {
           const lineIndex = this.quillInstance.getIndex(line);
           const lineLength = line.length();
           
-          // Delete the current line content
           this.quillInstance.deleteText(lineIndex, lineLength);
           
-          // Insert the new text and format the entire line as block-div
           this.quillInstance.insertText(lineIndex, option);
           this.quillInstance.formatLine(lineIndex, option.length, 'block-div', true);
           
-          // Set cursor position
           this.quillInstance.setSelection(lineIndex + option.length, 0);
         }
       }
     
-      // Cleanup
       this.quillInstance.off('text-change', textChangeHandler);
       subscription.unsubscribe();
       this.hideSlashMenu();
