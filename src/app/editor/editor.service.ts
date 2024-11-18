@@ -1,4 +1,5 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable, NgZone, ApplicationRef, ComponentRef, createComponent, EmbeddedViewRef, Injector } from '@angular/core';
+import { SlashMenuComponent } from './slash-menu/slash-menu.component';
 import Quill from 'quill';
 
 export interface QuillRange {
@@ -19,8 +20,13 @@ export interface ToolbarBounds {
 export class QuillService {
   private quillInstance!: Quill;
   private selectedImage: HTMLImageElement | null = null;
+  private slashMenuRef: ComponentRef<SlashMenuComponent> | null = null;
 
-  constructor(private ngZone: NgZone) {}
+  constructor(
+    private ngZone: NgZone,
+    private appRef: ApplicationRef,
+    private injector: Injector
+  ) {}
 
   initialize(editorElement: HTMLElement, textToolbar: HTMLElement, imageToolbar: HTMLElement) {
     this.registerCustomBlots();
@@ -168,6 +174,37 @@ export class QuillService {
               key: 13,
               handler: this.handleEnterKey.bind(this)
             },
+            slash: {
+              key: 191,
+              handler: () => {
+
+                requestAnimationFrame(() => {
+                  const selection = this.quillInstance.getSelection();
+                  if (!selection) return true;
+  
+                  console.log(selection);
+  
+                  const [line] = this.quillInstance.getLine(selection.index);
+                  if (!line || !line.domNode) return true;
+  
+                  console.log('line', line);
+  
+                  const text = line.domNode.textContent || '';
+                  
+                  console.log('tex',text);
+  
+                  if (text === '/') {
+                    console.log('slash');
+                    const bounds:any = this.quillInstance.getBounds(selection.index, 1);
+                    this.showSlashMenu(bounds, selection.index);
+                    return false;
+                  }
+                  return true;
+                });
+                
+                return true;
+              }
+            }
           }
         }
       },
@@ -176,10 +213,13 @@ export class QuillService {
 
     this.quillInstance = new Quill(editorElement, options);
 
-    this.quillInstance.clipboard.dangerouslyPasteHTML(
-      0, 
-      '<div class="block">Press Enter to create new blocks...</div>'
-    );
+    // Add initial content with block-div format
+    this.quillInstance.setContents([
+      { 
+        insert: 'xxxxxxxxxxxx xxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxx\n',
+        attributes: { 'block-div': true }
+      }
+    ]);
 
     return this.quillInstance;
   }
@@ -230,5 +270,93 @@ export class QuillService {
   }
 
   deleteImage() {
+  }
+
+  private showSlashMenu(bounds: any, index: number) {
+    this.hideSlashMenu();
+
+    const componentRef = createComponent(SlashMenuComponent, {
+      environmentInjector: this.appRef.injector,
+      elementInjector: this.injector
+    });
+
+    componentRef.instance.top = bounds.top + bounds.height;
+    componentRef.instance.left = bounds.left;
+    componentRef.instance.options = ['Option 1', 'Option 2'];
+
+    const domElem = (componentRef.hostView as EmbeddedViewRef<any>).rootNodes[0];
+    this.quillInstance.container.appendChild(domElem);
+
+    componentRef.changeDetectorRef.detectChanges();
+
+    // Handle option selection
+    const subscription = componentRef.instance.optionSelected.subscribe((option: string) => {
+      console.log('Service received:', option);
+      
+      // Get the current selection and line
+      const currentSelection = this.quillInstance.getSelection();
+      if (currentSelection) {
+        const [line] = this.quillInstance.getLine(currentSelection.index);
+        if (line) {
+          const lineIndex = this.quillInstance.getIndex(line);
+          
+          // Delete the slash and insert "done" in one operation
+
+          
+          // Set the cursor after "done"
+          requestAnimationFrame(() => {
+            this.quillInstance.deleteText(lineIndex, 1);
+            this.quillInstance.insertText(lineIndex, 'done');
+            this.quillInstance.setSelection(lineIndex + 4, 0);
+          });
+        }
+      }
+      
+      // Clean up
+      subscription.unsubscribe();
+      componentRef.destroy();
+      if (domElem.parentNode) {
+        domElem.parentNode.removeChild(domElem);
+      }
+      this.slashMenuRef = null;
+    });
+
+    // Handle clicks outside
+    const closeHandler = (e: MouseEvent) => {
+      if (!domElem.contains(e.target as Node)) {
+        // First remove the slash
+        const currentSelection = this.quillInstance.getSelection();
+        if (currentSelection) {
+          const [line] = this.quillInstance.getLine(currentSelection.index);
+          if (line) {
+            const lineIndex = this.quillInstance.getIndex(line);
+            // this.quillInstance.deleteText(lineIndex, 1);
+          }
+        }
+
+        subscription.unsubscribe();
+        componentRef.destroy();
+        if (domElem.parentNode) {
+          domElem.parentNode.removeChild(domElem);
+        }
+        this.slashMenuRef = null;
+        document.removeEventListener('click', closeHandler);
+      }
+    };
+
+    document.addEventListener('click', closeHandler);
+
+    this.slashMenuRef = componentRef;
+  }
+
+  private hideSlashMenu() {
+    if (this.slashMenuRef) {
+      const domElem = (this.slashMenuRef.hostView as EmbeddedViewRef<any>).rootNodes[0];
+      if (domElem.parentNode) {
+        domElem.parentNode.removeChild(domElem);
+      }
+      this.slashMenuRef.destroy();
+      this.slashMenuRef = null;
+    }
   }
 }

@@ -1,9 +1,12 @@
 import { Component, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
 import Quill from 'quill';
-import { QuillService, ToolbarBounds } from './editor.service';
+import { QuillService } from './editor.service';
+import { SlashMenuComponent } from './slash-menu/slash-menu.component';
 
 @Component({
   selector: 'app-quill-editor',
+  standalone: true,
+  imports: [SlashMenuComponent],
   template: `
     <div class="editor-container">
       <div #textToolbar class="floating-toolbar ql-toolbar ql-snow">
@@ -33,8 +36,7 @@ import { QuillService, ToolbarBounds } from './editor.service';
       <div #editor></div>
     </div>
   `,
-  styleUrls: ['./editor.component.css'],
-  standalone: true,
+  styleUrls: ['./editor.component.css']
 })
 export class QuillEditorComponent implements AfterViewInit {
   @ViewChild('editor') private editorElement!: ElementRef;
