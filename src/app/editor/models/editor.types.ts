@@ -1,5 +1,3 @@
-import Quill from 'quill';
-
 export interface QuillRange {
   index: number;
   length: number;

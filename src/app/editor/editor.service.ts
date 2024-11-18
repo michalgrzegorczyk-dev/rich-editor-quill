@@ -3,6 +3,7 @@ import { SlashMenuComponent } from './slash-menu/slash-menu.component';
 import Quill from 'quill';
 import { QuillRange } from './models/quill-range.model';
 import { ToolbarBounds } from './models/toolbar-bounds.model';
+import { QuillToolbarService } from './quill-toolbar.service';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +18,8 @@ export class QuillService {
   constructor(
     private ngZone: NgZone,
     private appRef: ApplicationRef,
-    private injector: Injector
+    private injector: Injector,
+    private quillToolbarService: QuillToolbarService
   ) {}
 
   initialize(editorElement: HTMLElement, textToolbar: HTMLElement, imageToolbar: HTMLElement) {
@@ -30,7 +32,8 @@ export class QuillService {
     this.quillInstance.on('selection-change', (range: QuillRange | null) => {
       this.ngZone.runOutsideAngular(() => {
         requestAnimationFrame(() => {
-          this.updateToolbarVisibility(range, textToolbar, imageToolbar);
+          // this.updateToolbarVisibility(range, textToolbar, imageToolbar);
+          this.quillToolbarService.updateToolbarVisibility(this.quillInstance, range, textToolbar, imageToolbar);
         });
       });
     });
@@ -44,7 +47,7 @@ export class QuillService {
         this.ngZone.runOutsideAngular(() => {
           requestAnimationFrame(() => {
             const image = target as HTMLImageElement;
-            this.showImageToolbar(image, imageToolbar, textToolbar);
+            this.quillToolbarService.showImageToolbar(this.quillInstance, image, imageToolbar, textToolbar);
           });
         });
       }
@@ -53,26 +56,26 @@ export class QuillService {
     return this.quillInstance;
   }
 
-  private updateToolbarVisibility(
-    range: QuillRange | null, 
-    textToolbar: HTMLElement, 
-    imageToolbar: HTMLElement
-  ) {
-    if (!range) {
-      this.hideAllToolbars(textToolbar, imageToolbar);
-      return;
-    }
+  // private updateToolbarVisibility(
+  //   range: QuillRange | null, 
+  //   textToolbar: HTMLElement, 
+  //   imageToolbar: HTMLElement
+  // ) {
+  //   if (!range) {
+  //     this.hideAllToolbars(textToolbar, imageToolbar);
+  //     return;
+  //   }
 
-    const [leaf] = this.quillInstance.getLeaf(range.index);
+  //   const [leaf] = this.quillInstance.getLeaf(range.index);
     
-    if (leaf?.domNode instanceof HTMLImageElement && range.length === 0) {
-      this.showImageToolbar(leaf.domNode, imageToolbar, textToolbar);
-    } else if (range.length > 0) {
-      this.showTextToolbar(range, textToolbar, imageToolbar);
-    } else {
-      this.hideAllToolbars(textToolbar, imageToolbar);
-    }
-  }
+  //   if (leaf?.domNode instanceof HTMLImageElement && range.length === 0) {
+  //     this.showImageToolbar(leaf.domNode, imageToolbar, textToolbar);
+  //   } else if (range.length > 0) {
+  //     this.showTextToolbar(range, textToolbar, imageToolbar);
+  //   } else {
+  //     this.hideAllToolbars(textToolbar, imageToolbar);
+  //   }
+  // }
 
   private hideAllToolbars(textToolbar: HTMLElement, imageToolbar: HTMLElement) {
     if (this.selectedImage) {
@@ -110,28 +113,28 @@ export class QuillService {
     this.updateToolbarPosition(imageToolbar, toolbarBounds, this.quillInstance.container);
   }
 
-  private showTextToolbar(
-    range: QuillRange,
-    textToolbar: HTMLElement,
-    imageToolbar: HTMLElement
-  ) {
-    imageToolbar.style.display = 'none';
+  // private showTextToolbar(
+  //   range: QuillRange,
+  //   textToolbar: HTMLElement,
+  //   imageToolbar: HTMLElement
+  // ) {
+  //   imageToolbar.style.display = 'none';
 
-    const bounds = this.quillInstance.getBounds(range.index, range.length);
-    if (!bounds) {
-      this.hideAllToolbars(textToolbar, imageToolbar);
-      return;
-    }
+  //   const bounds = this.quillInstance.getBounds(range.index, range.length);
+  //   if (!bounds) {
+  //     this.hideAllToolbars(textToolbar, imageToolbar);
+  //     return;
+  //   }
 
-    const toolbarBounds: ToolbarBounds = {
-      top: bounds.top,
-      left: bounds.left,
-      width: bounds.width,
-      height: bounds.height
-    };
+  //   const toolbarBounds: ToolbarBounds = {
+  //     top: bounds.top,
+  //     left: bounds.left,
+  //     width: bounds.width,
+  //     height: bounds.height
+  //   };
 
-    this.updateToolbarPosition(textToolbar, toolbarBounds, this.quillInstance.container);
-  }
+  //   this.updateToolbarPosition(textToolbar, toolbarBounds, this.quillInstance.container);
+  // }
 
   private registerCustomBlots() {
     const Block = Quill.import('blots/block') as any;
@@ -271,9 +274,10 @@ export class QuillService {
   }
 
   deleteImage() {
-    if (this.selectedImage) {
+    const selectedImage = this.quillToolbarService.getSelectedImage();
+    if (selectedImage) {
       const blocks = this.quillInstance.scroll.descendants(
-        (blot: any) => blot.domNode === this.selectedImage
+        (blot: any) => blot.domNode === selectedImage
       );
       
       if (blocks.length > 0) {
@@ -282,10 +286,7 @@ export class QuillService {
         
         this.quillInstance.deleteText(index, 1);
         
-        this.selectedImage.classList.remove('selected-image');
-        this.selectedImage = null;
-
-        this.hideAllToolbars(this.textToolbarRef, this.imageToolbarRef);
+        this.quillToolbarService.hideAllToolbars(this.textToolbarRef, this.imageToolbarRef);
       }
     }
   }
