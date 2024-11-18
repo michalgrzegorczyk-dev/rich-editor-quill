@@ -145,6 +145,8 @@ export class QuillService {
       static create(value: any) {
         const node = super.create(value);
         node.setAttribute('class', 'block');
+        
+        node.setAttribute('data-placeholder', 'Type "/" to run commands');
         return node;
       }
 
@@ -233,6 +235,10 @@ export class QuillService {
     if (offset === blockLength) {
       this.quillInstance.insertText(blockIndex + blockLength, '\n');
       this.quillInstance.formatLine(blockIndex + blockLength + 1, 1, 'block-div', true);
+      const [newBlock] = this.quillInstance.getLine(blockIndex + blockLength + 1);
+      if (newBlock && newBlock.domNode) {
+        newBlock.domNode.setAttribute('data-placeholder', 'Type "/" to run commands');
+      }
       this.quillInstance.setSelection(blockIndex + blockLength + 1, 0);
     } else {
       const textContent = block.domNode.textContent || '';
@@ -242,6 +248,10 @@ export class QuillService {
       this.quillInstance.insertText(blockIndex + offset, '\n');
       this.quillInstance.insertText(blockIndex + offset + 1, remainingText);
       this.quillInstance.formatLine(blockIndex + offset + 1, remainingText.length + 1, 'block-div', true);
+      const [newBlock] = this.quillInstance.getLine(blockIndex + offset + 1);
+      if (newBlock && newBlock.domNode) {
+        newBlock.domNode.setAttribute('data-placeholder', 'Type "/" to run commands');
+      }
       this.quillInstance.setSelection(blockIndex + offset + 1, 0);
     }
 

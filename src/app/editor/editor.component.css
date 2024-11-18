@@ -10,6 +10,16 @@
   background-color: #f9f9f9;
   border: 1px solid #ddd;
   border-radius: 4px;
+  position: relative;
+  min-height: 1.5em;
+}
+
+:host ::ng-deep .block:not(:empty):only-child:before,
+:host ::ng-deep .block:has(br):before {
+  content: attr(data-placeholder);
+  color: #999;
+  pointer-events: none;
+  position: absolute;
 }
 
 :host ::ng-deep .ql-editor {
