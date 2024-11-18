@@ -21,6 +21,8 @@ export class QuillService {
   private quillInstance!: Quill;
   private selectedImage: HTMLImageElement | null = null;
   private slashMenuRef: ComponentRef<SlashMenuComponent> | null = null;
+  private textToolbarRef!: HTMLElement;
+  private imageToolbarRef!: HTMLElement;
 
   constructor(
     private ngZone: NgZone,
@@ -29,6 +31,9 @@ export class QuillService {
   ) {}
 
   initialize(editorElement: HTMLElement, textToolbar: HTMLElement, imageToolbar: HTMLElement) {
+    this.textToolbarRef = textToolbar;
+    this.imageToolbarRef = imageToolbar;
+    
     this.registerCustomBlots();
     this.initializeQuill(editorElement, textToolbar);
     
@@ -276,6 +281,26 @@ export class QuillService {
   }
 
   deleteImage() {
+    if (this.selectedImage) {
+      const blocks = this.quillInstance.scroll.descendants(
+        (blot: any) => blot.domNode === this.selectedImage
+      );
+      
+      if (blocks.length > 0) {
+        const blot = blocks[0];
+        const index = this.quillInstance.getIndex(blot);
+        
+        // Delete the image
+        this.quillInstance.deleteText(index, 1);
+        
+        // Clear the selected image reference
+        this.selectedImage.classList.remove('selected-image');
+        this.selectedImage = null;
+
+        // Hide toolbars using stored references
+        this.hideAllToolbars(this.textToolbarRef, this.imageToolbarRef);
+      }
+    }
   }
 
   private showSlashMenu(bounds: any, index: number) {
@@ -286,28 +311,29 @@ export class QuillService {
       elementInjector: this.injector
     });
     
-    componentRef.instance.position = {
+    componentRef.instance.setPosition({
       top: bounds.top + bounds.height,
       left: bounds.left
-    };
-    componentRef.instance.filter = '/';
+    });
 
     const domElem = (componentRef.hostView as EmbeddedViewRef<any>).rootNodes[0];
     this.quillInstance.container.appendChild(domElem);
 
     componentRef.changeDetectorRef.detectChanges();
 
-    // Updated text change handler
+    // Store initial selection
+    let lastKnownSelection = this.quillInstance.getSelection();
+
     const textChangeHandler = () => {
       const selection = this.quillInstance.getSelection();
       if (!selection) return;
 
+      lastKnownSelection = selection; // Update last known selection
       const [line] = this.quillInstance.getLine(selection.index);
       if (!line) return;
 
       const text = line.domNode.textContent || '';
       
-      // Hide menu if slash is removed
       if (!text.includes('/')) {
         this.quillInstance.off('text-change', textChangeHandler);
         this.hideSlashMenu();
@@ -315,50 +341,36 @@ export class QuillService {
       }
 
       componentRef.instance.filter = text;
+      componentRef.changeDetectorRef.detectChanges();
     };
 
     this.quillInstance.on('text-change', textChangeHandler);
 
-    // Handle option selection
     const subscription = componentRef.instance.optionSelected.subscribe((option: string) => {
-      console.log('Service received:', option);
-      const selection = this.quillInstance.getSelection();
-      if (selection) {
-        const [line] = this.quillInstance.getLine(selection.index);
+      // Use the last known selection
+      if (lastKnownSelection) {
+        const [line] = this.quillInstance.getLine(lastKnownSelection.index);
         if (line) {
           const lineIndex = this.quillInstance.getIndex(line);
-          const text = line.domNode.textContent || '';
+          const lineLength = line.length();
           
-          requestAnimationFrame(() => {
-            this.quillInstance.deleteText(lineIndex, text.length);
-            this.quillInstance.insertText(lineIndex, 'done');
-            this.quillInstance.setSelection(lineIndex + 4, 0);
-          });
+          // Delete the current line content
+          this.quillInstance.deleteText(lineIndex, lineLength);
+          
+          // Insert the new text and format the entire line as block-div
+          this.quillInstance.insertText(lineIndex, option);
+          this.quillInstance.formatLine(lineIndex, option.length, 'block-div', true);
+          
+          // Set cursor position
+          this.quillInstance.setSelection(lineIndex + option.length, 0);
         }
       }
-
+    
+      // Cleanup
       this.quillInstance.off('text-change', textChangeHandler);
       subscription.unsubscribe();
-      componentRef.destroy();
-      if (domElem.parentNode) {
-        domElem.parentNode.removeChild(domElem);
-      }
-      this.slashMenuRef = null;
+      this.hideSlashMenu();
     });
-
-    const closeHandler = (e: MouseEvent) => {
-      if (!domElem.contains(e.target as Node)) {
-        subscription.unsubscribe();
-        componentRef.destroy();
-        if (domElem.parentNode) {
-          domElem.parentNode.removeChild(domElem);
-        }
-        this.slashMenuRef = null;
-        document.removeEventListener('click', closeHandler);
-      }
-    };
-
-    document.addEventListener('click', closeHandler);
 
     this.slashMenuRef = componentRef;
   }

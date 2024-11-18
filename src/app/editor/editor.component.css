@@ -14,8 +14,8 @@
   min-height: 1.5em;
 }
 
-:host ::ng-deep .block:not(:empty):only-child:before,
-:host ::ng-deep .block:has(br):before {
+:host ::ng-deep .block:empty::before,
+:host ::ng-deep .block:has(br:only-child)::before {
   content: attr(data-placeholder);
   color: #999;
   pointer-events: none;

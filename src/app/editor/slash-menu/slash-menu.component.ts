@@ -1,55 +1,47 @@
-import { Component, EventEmitter, Input, Output, ChangeDetectorRef, inject, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Position } from '../models/position.model';
-
-type SlashCommand = string;
+import { Component, EventEmitter, Output, signal } from '@angular/core';
 
 @Component({
   selector: 'app-slash-menu',
   standalone: true,
-  imports: [CommonModule],
   templateUrl: './slash-menu.component.html',
   styleUrls: ['./slash-menu.component.scss']
 })
 export class SlashMenuComponent {
-  private readonly SLASH_COMMANDS: SlashCommand[] = ['Option 1', 'Option 2'];
-  private readonly searchQuery = signal<string>('/');
-  private readonly cdr = inject(ChangeDetectorRef);
-
-  readonly menuPosition = signal<Position>({ top: 0, left: 0 });
+  @Output() optionSelected = new EventEmitter<string>();
   
-  readonly filteredOptions = computed(() => {
-    const query = this.searchQuery();
-    return this.shouldShowAllOptions(query) 
-      ? this.SLASH_COMMANDS 
-      : this.filterOptions(query);
-  });
+  private _filter = signal('');
+  menuPosition = signal({ top: 0, left: 0 });
+  
+  options = ['Option 1', 'Option 2', 'Option 3'];
+  filteredOptions = signal(this.options);
 
-  @Output() readonly optionSelected = new EventEmitter<SlashCommand>();
-
-  @Input()
-  set position(value: Position) {
-    this.menuPosition.set(value);
+  set filter(value: string) {
+    this._filter.set(value);
+    this.updateFilteredOptions();
   }
 
-  @Input()
-  set filter(text: string) {
-    this.searchQuery.set(text);
-    this.cdr.detectChanges();
-  }
-
-  onOptionSelect(option: SlashCommand): void {
+  onOptionSelect(option: string) {
+    console.log('Option selected:', option);
     this.optionSelected.emit(option);
   }
 
-  private shouldShowAllOptions(query: string): boolean {
-    return !query || query === '/';
+  private updateFilteredOptions() {
+    const filterText = this._filter().toLowerCase().replace('/', '').trim();
+    console.log('Filtering with:', filterText);
+    
+    if (!filterText) {
+      this.filteredOptions.set(this.options);
+      return;
+    }
+
+    const filtered = this.options.filter(option => 
+      option.toLowerCase().includes(filterText)
+    );
+    console.log('Filtered options:', filtered);
+    this.filteredOptions.set(filtered);
   }
 
-  private filterOptions(query: string): SlashCommand[] {
-    const searchTerm = query.slice(1).toLowerCase();
-    return this.SLASH_COMMANDS.filter(option => 
-      option.toLowerCase().includes(searchTerm)
-    );
+  setPosition(value: { top: number; left: number }) {
+    this.menuPosition.set(value);
   }
 } 
