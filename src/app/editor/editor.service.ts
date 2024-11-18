@@ -18,6 +18,7 @@ export interface ToolbarBounds {
   providedIn: 'root'
 })
 export class QuillService {
+  private readonly SLASH_COMMANDS = ['Option 1', 'Option 2'];
   private quillInstance!: Quill;
   private selectedImage: HTMLImageElement | null = null;
   private slashMenuRef: ComponentRef<SlashMenuComponent> | null = null;
@@ -268,6 +269,39 @@ export class QuillService {
   deleteImage() {
   }
 
+  private cleanupSlashMenu(
+    componentRef: ComponentRef<SlashMenuComponent>, 
+    subscription: any, 
+    textChangeHandler: () => void, 
+    domElem: Element
+  ) {
+    this.quillInstance.off('text-change', textChangeHandler);
+    subscription.unsubscribe();
+    componentRef.destroy();
+    if (domElem.parentNode) {
+      domElem.parentNode.removeChild(domElem);
+    }
+    this.slashMenuRef = null;
+  }
+
+  private filterOptions(
+    componentRef: ComponentRef<SlashMenuComponent>,
+    selection: any
+  ): void {
+    const [line] = this.quillInstance.getLine(selection.index);
+    if (!line) return;
+
+    const text = line.domNode.textContent || '';
+    const query = text.slice(1).toLowerCase(); // Remove the "/" and convert to lowercase
+    
+    const filteredOptions = this.SLASH_COMMANDS.filter(option => 
+      option.toLowerCase().includes(query)
+    );
+    
+    componentRef.instance.options = filteredOptions;
+    componentRef.changeDetectorRef.detectChanges();
+  }
+
   private showSlashMenu(bounds: any, index: number) {
     this.hideSlashMenu();
 
@@ -275,35 +309,20 @@ export class QuillService {
       environmentInjector: this.appRef.injector,
       elementInjector: this.injector
     });
-
-    const allOptions = ['Option 1', 'Option 2'];
     
     componentRef.instance.top = bounds.top + bounds.height;
     componentRef.instance.left = bounds.left;
-    componentRef.instance.options = allOptions;
+    componentRef.instance.options = this.SLASH_COMMANDS;
 
     const domElem = (componentRef.hostView as EmbeddedViewRef<any>).rootNodes[0];
     this.quillInstance.container.appendChild(domElem);
 
     componentRef.changeDetectorRef.detectChanges();
 
-    // Listen to text changes to filter options
     const textChangeHandler = () => {
       const selection = this.quillInstance.getSelection();
       if (!selection) return;
-
-      const [line] = this.quillInstance.getLine(selection.index);
-      if (!line) return;
-
-      const text = line.domNode.textContent || '';
-      const query = text.slice(1).toLowerCase(); // Remove the "/" and convert to lowercase
-      
-      const filteredOptions = allOptions.filter(option => 
-        option.toLowerCase().includes(query)
-      );
-      
-      componentRef.instance.options = filteredOptions;
-      componentRef.changeDetectorRef.detectChanges();
+      this.filterOptions(componentRef, selection);
     };
 
     this.quillInstance.on('text-change', textChangeHandler);
@@ -319,31 +338,19 @@ export class QuillService {
           const text = line.domNode.textContent || '';
           
           requestAnimationFrame(() => {
-            this.quillInstance.deleteText(lineIndex, text.length); // Delete entire text
+            this.quillInstance.deleteText(lineIndex, text.length);
             this.quillInstance.insertText(lineIndex, 'done');
             this.quillInstance.setSelection(lineIndex + 4, 0);
           });
         }
       }
       
-      this.quillInstance.off('text-change', textChangeHandler); // Remove listener
-      subscription.unsubscribe();
-      componentRef.destroy();
-      if (domElem.parentNode) {
-        domElem.parentNode.removeChild(domElem);
-      }
-      this.slashMenuRef = null;
+      this.cleanupSlashMenu(componentRef, subscription, textChangeHandler, domElem);
     });
 
     const closeHandler = (e: MouseEvent) => {
       if (!domElem.contains(e.target as Node)) {
-        this.quillInstance.off('text-change', textChangeHandler); // Remove listener
-        subscription.unsubscribe();
-        componentRef.destroy();
-        if (domElem.parentNode) {
-          domElem.parentNode.removeChild(domElem);
-        }
-        this.slashMenuRef = null;
+        this.cleanupSlashMenu(componentRef, subscription, textChangeHandler, domElem);
         document.removeEventListener('click', closeHandler);
       }
     };
