@@ -18,7 +18,6 @@ export interface ToolbarBounds {
   providedIn: 'root'
 })
 export class QuillService {
-  private readonly SLASH_COMMANDS = ['Option 1', 'Option 2'];
   private quillInstance!: Quill;
   private selectedImage: HTMLImageElement | null = null;
   private slashMenuRef: ComponentRef<SlashMenuComponent> | null = null;
@@ -269,39 +268,6 @@ export class QuillService {
   deleteImage() {
   }
 
-  private cleanupSlashMenu(
-    componentRef: ComponentRef<SlashMenuComponent>, 
-    subscription: any, 
-    textChangeHandler: () => void, 
-    domElem: Element
-  ) {
-    this.quillInstance.off('text-change', textChangeHandler);
-    subscription.unsubscribe();
-    componentRef.destroy();
-    if (domElem.parentNode) {
-      domElem.parentNode.removeChild(domElem);
-    }
-    this.slashMenuRef = null;
-  }
-
-  private filterOptions(
-    componentRef: ComponentRef<SlashMenuComponent>,
-    selection: any
-  ): void {
-    const [line] = this.quillInstance.getLine(selection.index);
-    if (!line) return;
-
-    const text = line.domNode.textContent || '';
-    const query = text.slice(1).toLowerCase(); // Remove the "/" and convert to lowercase
-    
-    const filteredOptions = this.SLASH_COMMANDS.filter(option => 
-      option.toLowerCase().includes(query)
-    );
-    
-    componentRef.instance.options = filteredOptions;
-    componentRef.changeDetectorRef.detectChanges();
-  }
-
   private showSlashMenu(bounds: any, index: number) {
     this.hideSlashMenu();
 
@@ -310,29 +276,37 @@ export class QuillService {
       elementInjector: this.injector
     });
     
-    componentRef.instance.top = bounds.top + bounds.height;
-    componentRef.instance.left = bounds.left;
-    componentRef.instance.options = this.SLASH_COMMANDS;
+    componentRef.instance.position = {
+      top: bounds.top + bounds.height,
+      left: bounds.left
+    };
+    componentRef.instance.filter = '/';
 
     const domElem = (componentRef.hostView as EmbeddedViewRef<any>).rootNodes[0];
     this.quillInstance.container.appendChild(domElem);
 
     componentRef.changeDetectorRef.detectChanges();
 
+    // Handle text changes for filtering
     const textChangeHandler = () => {
       const selection = this.quillInstance.getSelection();
       if (!selection) return;
-      this.filterOptions(componentRef, selection);
+
+      const [line] = this.quillInstance.getLine(selection.index);
+      if (!line) return;
+
+      const text = line.domNode.textContent || '';
+      componentRef.instance.filter = text;
     };
 
     this.quillInstance.on('text-change', textChangeHandler);
 
+    // Handle option selection
     const subscription = componentRef.instance.optionSelected.subscribe((option: string) => {
       console.log('Service received:', option);
-      
-      const currentSelection = this.quillInstance.getSelection();
-      if (currentSelection) {
-        const [line] = this.quillInstance.getLine(currentSelection.index);
+      const selection = this.quillInstance.getSelection();
+      if (selection) {
+        const [line] = this.quillInstance.getLine(selection.index);
         if (line) {
           const lineIndex = this.quillInstance.getIndex(line);
           const text = line.domNode.textContent || '';
@@ -344,13 +318,24 @@ export class QuillService {
           });
         }
       }
-      
-      this.cleanupSlashMenu(componentRef, subscription, textChangeHandler, domElem);
+
+      this.quillInstance.off('text-change', textChangeHandler);
+      subscription.unsubscribe();
+      componentRef.destroy();
+      if (domElem.parentNode) {
+        domElem.parentNode.removeChild(domElem);
+      }
+      this.slashMenuRef = null;
     });
 
     const closeHandler = (e: MouseEvent) => {
       if (!domElem.contains(e.target as Node)) {
-        this.cleanupSlashMenu(componentRef, subscription, textChangeHandler, domElem);
+        subscription.unsubscribe();
+        componentRef.destroy();
+        if (domElem.parentNode) {
+          domElem.parentNode.removeChild(domElem);
+        }
+        this.slashMenuRef = null;
         document.removeEventListener('click', closeHandler);
       }
     };
