@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import Quill from 'quill';
-import { BehaviorSubject } from 'rxjs';
 
 export interface QuillRange {
   index: number;
@@ -19,13 +18,98 @@ export interface ToolbarBounds {
 })
 export class QuillService {
   private quillInstance!: Quill;
-  private selectedImageSubject = new BehaviorSubject<HTMLImageElement | null>(null);
-  selectedImage$ = this.selectedImageSubject.asObservable();
+  private selectionState: 'text' | 'image' | 'none' = 'none';
 
-  initialize(editorElement: HTMLElement, toolbar: HTMLElement) {
+  initialize(editorElement: HTMLElement, textToolbar: HTMLElement, imageToolbar: HTMLElement) {
     this.registerCustomBlots();
-    this.initializeQuill(editorElement, toolbar);
+    this.initializeQuill(editorElement, textToolbar);
+    
+    // Handle selection changes
+    this.quillInstance.on('selection-change', (range: QuillRange | null) => {
+      requestAnimationFrame(() => {
+        this.updateToolbarVisibility(range, textToolbar, imageToolbar);
+      });
+    });
+
     return this.quillInstance;
+  }
+
+  private updateToolbarVisibility(
+    range: QuillRange | null, 
+    textToolbar: HTMLElement, 
+    imageToolbar: HTMLElement
+  ) {
+    if (!range) {
+      this.hideAllToolbars(textToolbar, imageToolbar);
+      return;
+    }
+
+    const [leaf] = this.quillInstance.getLeaf(range.index);
+    
+    if (leaf?.domNode instanceof HTMLImageElement) {
+      this.showImageToolbar(leaf.domNode, imageToolbar, textToolbar);
+    } else if (range.length > 0) {
+      this.showTextToolbar(range, textToolbar, imageToolbar);
+    } else {
+      this.hideAllToolbars(textToolbar, imageToolbar);
+    }
+  }
+
+  private hideAllToolbars(textToolbar: HTMLElement, imageToolbar: HTMLElement) {
+    textToolbar.style.display = 'none';
+    imageToolbar.style.display = 'none';
+    this.selectionState = 'none';
+  }
+
+  private showImageToolbar(
+    image: HTMLImageElement, 
+    imageToolbar: HTMLElement, 
+    textToolbar: HTMLElement
+  ) {
+    // Hide text toolbar
+    textToolbar.style.display = 'none';
+
+    // Get bounds and position image toolbar
+    const bounds = image.getBoundingClientRect();
+    const editorBounds = this.quillInstance.container.getBoundingClientRect();
+
+    const toolbarBounds: ToolbarBounds = {
+      top: bounds.top - editorBounds.top + window.scrollY,
+      left: bounds.left - editorBounds.left,
+      width: bounds.width,
+      height: bounds.height
+    };
+
+    this.updateToolbarPosition(imageToolbar, toolbarBounds, this.quillInstance.container);
+    this.selectionState = 'image';
+  }
+
+  private showTextToolbar(
+    range: QuillRange,
+    textToolbar: HTMLElement,
+    imageToolbar: HTMLElement
+  ) {
+    // Hide image toolbar
+    imageToolbar.style.display = 'none';
+
+    // Get bounds and position text toolbar
+    const bounds = this.quillInstance.getBounds(range.index, range.length);
+    if (!bounds) {
+      this.hideAllToolbars(textToolbar, imageToolbar);
+      return;
+    }
+
+    const editorBounds = this.quillInstance.container.getBoundingClientRect();
+
+    const toolbarBounds: ToolbarBounds = {
+      top: bounds.top,
+      left: bounds.left,
+      width: bounds.width,
+      height: bounds.height
+    };
+
+    this.updateToolbarPosition(textToolbar, toolbarBounds, this.quillInstance.container);
+    this.selectionState = 'text';
   }
 
   private registerCustomBlots() {
@@ -46,7 +130,6 @@ export class QuillService {
   }
 
   private initializeQuill(editorElement: HTMLElement, toolbar: HTMLElement) {
-
     this.quillInstance = new Quill(editorElement, {
       theme: 'snow',
       modules: {
@@ -60,23 +143,51 @@ export class QuillService {
             right: {
               key: 39,
               handler: (range: QuillRange) => {
-                if (!range) return true;
-    
-                // Use requestAnimationFrame to get the updated selection after the default handler
-                requestAnimationFrame(() => {
-                  const currentSelection = this.quillInstance.getSelection();
-                  console.log('Current selection:', currentSelection);
-                  console.log('Current contents:', this.quillInstance.getContents());
+                // console.log('right');
+                // requestAnimationFrame(() => {
+                  // const selection: any = this.quillInstance.getSelection();
+
+                  // if (!selection) {
+                  //   return true;
+                  // }
+
+                  // const [prevLeaf] = this.quillInstance.getLeaf(selection.index) as any;
                   
-                  const [leaf] = this.quillInstance.getLeaf(currentSelection?.index || 0);
-                  if (leaf?.domNode instanceof HTMLImageElement) {
-                    this.handleImageClick(leaf.domNode);
-                  } else {
-                    this.handleImageClick(null);
-                  }
-                });
-            
-                return true; // Let Quill handle the default arrow behavior first
+                  // if (prevLeaf?.parent?.formats()?.bold) {
+                  //   console.log('bold');
+                  // }
+
+                  // console.log('prevLeaf', prevLeaf);
+
+
+                  // return true;
+                // });
+
+                return true;
+              }
+            },
+            left: {
+              key: 37,
+              handler: (range: QuillRange) => {
+                // if (!range) return true;
+
+                // const [currentLeaf] = this.quillInstance.getLeaf(range.index);
+                // const prevLeaf = range.index > 0 ? this.quillInstance.getLeaf(range.index - 1)[0] : null;
+
+                // // If we're after an image
+                // if (prevLeaf?.domNode instanceof HTMLImageElement && !range.length) {
+                //   // Select the image
+                //   this.quillInstance.setSelection(range.index - 1, 1);
+                //   return false;
+                // }
+
+                // // If an image is selected, move cursor before it
+                // if (currentLeaf?.domNode instanceof HTMLImageElement && range.length === 1) {
+                //   this.quillInstance.setSelection(range.index, 0);
+                //   return false;
+                // }
+
+                return true;
               }
             }
           }
@@ -101,7 +212,7 @@ export class QuillService {
     if (!block) return true;
 
     const blockLength = block.length();
-    const blockIndex = this.quillInstance.getIndex(block as any);
+    const blockIndex = this.quillInstance.getIndex(block);
 
     if (offset === blockLength) {
       this.quillInstance.insertText(blockIndex + blockLength, '\n', { 'block-div': true });
@@ -132,47 +243,8 @@ export class QuillService {
   }
 
   resizeImage(size: 'small' | 'medium' | 'large') {
-    const selectedImage = this.selectedImageSubject.value;
-    if (selectedImage) {
-      const sizes = {
-        small: '200px',
-        medium: '400px',
-        large: '600px'
-      };
-      selectedImage.style.width = sizes[size];
-    }
   }
 
   deleteImage() {
-    const selectedImage = this.selectedImageSubject.value;
-    if (selectedImage) {
-      const blot = Quill.find(selectedImage);
-      if (blot) {
-        const index = this.quillInstance.getIndex(blot as any);
-        this.quillInstance.deleteText(index, 1);
-        return true;
-      }
-    }
-    return false;
-  }
-
-
-  handleImageClick(image: HTMLImageElement | null) {
-    if (image) {
-      const blot = Quill.find(image);
-      if (blot) {
-        const index = this.quillInstance.getIndex(blot as any);
-        this.quillInstance.setSelection(index, 1);
-        this.selectedImageSubject.next(image);
-      }
-    } else {
-      this.selectedImageSubject.next(null);
-    }
-  }
-
-  insertImage(url: string, index?: number) {
-    const currentIndex = index ?? (this.quillInstance.getSelection()?.index || 0);
-    this.quillInstance.insertEmbed(currentIndex, 'image', url, 'user');
-    this.quillInstance.setSelection(currentIndex + 1, 0);
   }
 }

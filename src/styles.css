@@ -1,20 +1,7 @@
-/* You can add global styles to this file, and also import other style files */
 .ql-editor img {
-    cursor: pointer;
-    margin: 5px 0;
-}
-
-.ql-editor img.ql-selected {
-    border: 2px solid #06c;
-    padding: 2px;
-}
-
-.ql-editor .inline-image {
-    vertical-align: middle;
-    margin: 0 4px;
     cursor: pointer;
   }
   
-  .ql-editor .inline-image.ql-selected {
+  .ql-editor img.ql-selected {
     box-shadow: 0 0 0 2px #06c;
   }
