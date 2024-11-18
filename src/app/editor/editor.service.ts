@@ -18,14 +18,12 @@ export interface ToolbarBounds {
 })
 export class QuillService {
   private quillInstance!: Quill;
-  private selectionState: 'text' | 'image' | 'none' = 'none';
-  private selectedImage: HTMLImageElement | null = null;  // Add this line
+  private selectedImage: HTMLImageElement | null = null;
 
   initialize(editorElement: HTMLElement, textToolbar: HTMLElement, imageToolbar: HTMLElement) {
     this.registerCustomBlots();
     this.initializeQuill(editorElement, textToolbar);
     
-    // Handle selection changes
     this.quillInstance.on('selection-change', (range: QuillRange | null) => {
       requestAnimationFrame(() => {
         this.updateToolbarVisibility(range, textToolbar, imageToolbar);
@@ -63,7 +61,6 @@ export class QuillService {
     }
     textToolbar.style.display = 'none';
     imageToolbar.style.display = 'none';
-    this.selectionState = 'none';
   }
 
   private showImageToolbar(
@@ -71,7 +68,6 @@ export class QuillService {
     imageToolbar: HTMLElement, 
     textToolbar: HTMLElement
   ) {
-
     if (this.selectedImage) {
       this.selectedImage.classList.remove('selected-image');
     }
@@ -79,11 +75,8 @@ export class QuillService {
     image.classList.add('selected-image');
     this.selectedImage = image;
 
-
-    // Hide text toolbar
     textToolbar.style.display = 'none';
 
-    // Get bounds and position image toolbar
     const bounds = image.getBoundingClientRect();
     const editorBounds = this.quillInstance.container.getBoundingClientRect();
 
@@ -95,7 +88,6 @@ export class QuillService {
     };
 
     this.updateToolbarPosition(imageToolbar, toolbarBounds, this.quillInstance.container);
-    this.selectionState = 'image';
   }
 
   private showTextToolbar(
@@ -103,17 +95,13 @@ export class QuillService {
     textToolbar: HTMLElement,
     imageToolbar: HTMLElement
   ) {
-    // Hide image toolbar
     imageToolbar.style.display = 'none';
 
-    // Get bounds and position text toolbar
     const bounds = this.quillInstance.getBounds(range.index, range.length);
     if (!bounds) {
       this.hideAllToolbars(textToolbar, imageToolbar);
       return;
     }
-
-    const editorBounds = this.quillInstance.container.getBoundingClientRect();
 
     const toolbarBounds: ToolbarBounds = {
       top: bounds.top,
@@ -123,7 +111,6 @@ export class QuillService {
     };
 
     this.updateToolbarPosition(textToolbar, toolbarBounds, this.quillInstance.container);
-    this.selectionState = 'text';
   }
 
   private registerCustomBlots() {
