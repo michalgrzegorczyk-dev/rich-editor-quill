@@ -60,21 +60,20 @@ export class QuillEventsService {
 
   private setupClickListener() {
     this.quillInstance.root.addEventListener('click', (event) => {
-      requestAnimationFrame(() => {
-        const target = event.target as HTMLElement;
-        if (target.tagName === 'IMG') {
-          this.quillInstance.setSelection(null);
-          
-          const bounds = target.getBoundingClientRect();
-          const editorBounds = this.quillInstance.container.getBoundingClientRect();
-          
+      const target = event.target as HTMLElement;
+      if (target.tagName === 'IMG') {
+        this.quillInstance.setSelection(null);
+        
+        const bounds = target.getBoundingClientRect();
+        const editorBounds = this.quillInstance.container.getBoundingClientRect();
+
+        requestAnimationFrame(() => {
           this.quillToolbarService.showToolbar('img', {
             top: bounds.top - editorBounds.top,
             left: bounds.left + 100
           });
-          event.stopPropagation();
-        }
-      });
+        });
+      }
     });
   }
 
