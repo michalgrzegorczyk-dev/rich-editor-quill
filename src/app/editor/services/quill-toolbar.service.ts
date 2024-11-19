@@ -118,7 +118,7 @@ export class QuillToolbarService {
 
     if (bounds) {
       componentRef.instance.position = {
-        top: bounds.top - 50, // Offset to show above the image
+        top: bounds.top,
         left: bounds.left
       };
     }

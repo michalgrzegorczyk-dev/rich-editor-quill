@@ -52,7 +52,7 @@ export class ImageToolbarComponent {
   constructor(private quillImageService: QuillImageService) {}
 
   getTopPosition(): number {
-    return (this.position?.top ?? 0) - 10;
+    return this.position?.top ?? 0;
   }
 
   getLeftPosition(): number {

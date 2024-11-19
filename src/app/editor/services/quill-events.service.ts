@@ -40,7 +40,7 @@ export class QuillEventsService {
           const editorBounds = this.quillInstance.container.getBoundingClientRect();
           
           this.quillToolbarService.showToolbar2('img', {
-            top: bounds.top - editorBounds.top - 5,
+            top: bounds.top - editorBounds.top - 45,
             left: bounds.left - editorBounds.left + (bounds.width / 2)
           });
           textToolbar.style.display = 'none';
@@ -63,12 +63,18 @@ export class QuillEventsService {
           this.quillInstance.setSelection(null);
           textToolbar.style.display = 'none';
           
+          console.log('t', target)
+
           const bounds = target.getBoundingClientRect();
+          console.log('b', bounds)
+
           const editorBounds = this.quillInstance.container.getBoundingClientRect();
+          console.log('e', editorBounds)
           
+
           this.quillToolbarService.showToolbar2('img', {
-            top: bounds.top - editorBounds.top - 10,
-            left: bounds.left - editorBounds.left + (bounds.width / 2)
+            top: bounds.top - editorBounds.top,
+            left: bounds.left + 100
           });
         }
       });
