@@ -11,11 +11,11 @@ export class QuillConfigService {
     private quillSlashMenuService: QuillSlashMenuService
   ) {}
 
-  getEditorConfig(toolbar: HTMLElement) {
+  getEditorConfig() {
     return {
       theme: 'snow',
       modules: {
-        toolbar: toolbar,
+        toolbar: false,
         keyboard: {
           bindings: this.quillKeyboardService.getKeyboardBindings(
             this.quillSlashMenuService.showMenu.bind(this.quillSlashMenuService)

@@ -17,17 +17,17 @@ export class QuillEventsService {
     this.quillInstance = quill;
   }
 
-  setupEventListeners(textToolbar: HTMLElement) {
-    this.setupSelectionChangeListener(textToolbar);
-    this.setupClickListener(textToolbar);
+  setupEventListeners() {
+    this.setupSelectionChangeListener();
+    this.setupClickListener();
     this.setupClickOutsideListener();
   }
 
-  private setupSelectionChangeListener(textToolbar: HTMLElement) {
+  private setupSelectionChangeListener() {
     this.quillInstance.on('selection-change', (range: QuillRange | null) => {
       requestAnimationFrame(() => {
         if (!range) {
-          textToolbar.style.display = 'none';
+        //   textToolbar.style.display = 'none';
           this.quillToolbarService.hideActiveToolbar();
           return;
         }
@@ -38,34 +38,34 @@ export class QuillEventsService {
           const bounds = leaf.domNode.getBoundingClientRect();
           const editorBounds = this.quillInstance.container.getBoundingClientRect();
           
-          this.quillToolbarService.showToolbar2('img', {
+          this.quillToolbarService.showToolbar('img', {
             top: bounds.top - editorBounds.top - 45,
             left: bounds.left - editorBounds.left + (bounds.width / 2)
           });
-          textToolbar.style.display = 'none';
+          // textToolbar.style.display = 'none';
         } else if (range.length > 0) {
-          textToolbar.style.display = 'block';
+          // textToolbar.style.display = 'block';
           this.quillToolbarService.hideActiveToolbar();
         } else {
-          textToolbar.style.display = 'none';
+          // textToolbar.style.display = 'none';
           this.quillToolbarService.hideActiveToolbar();
         }
       });
     });
   }
 
-  private setupClickListener(textToolbar: HTMLElement) {
+  private setupClickListener() {
     this.quillInstance.root.addEventListener('click', (event) => {
       requestAnimationFrame(() => {
         const target = event.target as HTMLElement;
         if (target.tagName === 'IMG') {
           this.quillInstance.setSelection(null);
-          textToolbar.style.display = 'none';
+        //   textToolbar.style.display = 'none';
           
           const bounds = target.getBoundingClientRect();
           const editorBounds = this.quillInstance.container.getBoundingClientRect();
           
-          this.quillToolbarService.showToolbar2('img', {
+          this.quillToolbarService.showToolbar('img', {
             top: bounds.top - editorBounds.top,
             left: bounds.left + 100
           });

@@ -22,21 +22,21 @@ export class QuillService {
     private quillEventsService: QuillEventsService,
   ) {}
 
-  initialize(editorElement: HTMLElement, textToolbar: HTMLElement) {
+  initialize(editorElement: HTMLElement) {
     this.quillBlotService.registerCustomBlots();
-    this.initializeQuill(editorElement, textToolbar);
+    this.initializeQuill(editorElement);
     
     this.quillSlashMenuService.initialize(this.quillInstance);
     this.quillImageService.initialize(this.quillInstance);
     this.quillEventsService.initialize(this.quillInstance);
     
-    this.quillEventsService.setupEventListeners(textToolbar);
+    this.quillEventsService.setupEventListeners();
 
     return this.quillInstance;
   }
   
-  private initializeQuill(editorElement: HTMLElement, toolbar: HTMLElement) {
-    const options = this.quillConfigService.getEditorConfig(toolbar);
+  private initializeQuill(editorElement: HTMLElement) {
+    const options = this.quillConfigService.getEditorConfig();
     this.quillInstance = new Quill(editorElement, options);
     this.quillKeyboardService.initialize(this.quillInstance);
     this.quillInstance.setContents(this.quillConfigService.getInitialContent());
