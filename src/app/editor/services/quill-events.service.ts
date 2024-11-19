@@ -9,9 +9,7 @@ import { QuillToolbarService } from './quill-toolbar.service';
 export class QuillEventsService {
   private quillInstance!: Quill;
 
-  constructor(
-    private quillToolbarService: QuillToolbarService,
-  ) {}
+  constructor(private quillToolbarService: QuillToolbarService) {}
 
   initialize(quill: Quill) {
     this.quillInstance = quill;
@@ -25,7 +23,6 @@ export class QuillEventsService {
 
   private setupSelectionChangeListener() {
     this.quillInstance.on('selection-change', (range: QuillRange | null) => {
-      requestAnimationFrame(() => {
         if (!range) {
           this.quillToolbarService.hideActiveToolbar();
           return;
@@ -41,7 +38,10 @@ export class QuillEventsService {
             top: bounds.top - editorBounds.top,
             left: bounds.left + 100
           });// todo duplicate code
-        } else if (range.length > 0) {
+        } 
+        
+        else if (range.length > 0) {
+          console.log('range.length > 0', range);
           const bounds = this.quillInstance.getBounds(range.index, range.length);
           if (bounds) {
             const editorBounds = this.quillInstance.container.getBoundingClientRect();
@@ -51,10 +51,11 @@ export class QuillEventsService {
               left: bounds.left - editorBounds.left + (bounds.width / 2) + 250
             });
           }
-        } else {
+        } 
+        
+        else {
           this.quillToolbarService.hideActiveToolbar();
         }
-      });
     });
   }
 
