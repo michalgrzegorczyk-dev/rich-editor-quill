@@ -11,83 +11,90 @@ export class QuillEventsService {
 
   constructor(private quillToolbarService: QuillToolbarService) {}
 
-  initialize(quill: Quill) {
+  initialize(quill: Quill): void {
     this.quillInstance = quill;
   }
 
-  setupEventListeners() {
+  setupEventListeners(): void {
     this.setupSelectionChangeListener();
     this.setupClickListener();
     this.setupClickOutsideListener();
   }
 
-  private setupSelectionChangeListener() {
+  private setupSelectionChangeListener(): void {
     this.quillInstance.on('selection-change', (range: QuillRange | null) => {
-        if (!range) {
-          this.quillToolbarService.hideActiveToolbar();
-          return;
-        }
-
-        const [leaf] = this.quillInstance.getLeaf(range.index);
-        
-        if (leaf?.domNode instanceof HTMLImageElement && range.length === 0) {
-          const bounds = leaf.domNode.getBoundingClientRect();
-          const editorBounds = this.quillInstance.container.getBoundingClientRect();
-          
-          this.quillToolbarService.showToolbar('img', {
-            top: bounds.top - editorBounds.top,
-            left: bounds.left + 100
-          });// todo duplicate code
-        } 
-        
-        else if (range.length > 0) {
-          console.log('range.length > 0', range);
-          const bounds = this.quillInstance.getBounds(range.index, range.length);
-          if (bounds) {
-            const editorBounds = this.quillInstance.container.getBoundingClientRect();
-            
-            this.quillToolbarService.showToolbar('txt', {
-              top: bounds.top + 65,
-              left: bounds.left - editorBounds.left + (bounds.width / 2) + 250
-            });
-          }
-        } 
-        
-        else {
-          this.quillToolbarService.hideActiveToolbar();
-        }
-    });
-  }
-
-  private setupClickListener() {
-    this.quillInstance.root.addEventListener('click', (event) => {
-      const target = event.target as HTMLElement;
-      if (target.tagName === 'IMG') {
-        this.quillInstance.setSelection(null);
-        
-        const bounds = target.getBoundingClientRect();
-        const editorBounds = this.quillInstance.container.getBoundingClientRect();
-
-        requestAnimationFrame(() => {
-          this.quillToolbarService.showToolbar('img', {
-            top: bounds.top - editorBounds.top,
-            left: bounds.left + 100
-          });
-        });
+      if (!range) {
+        this.quillToolbarService.hideActiveToolbar();
+        return;
       }
-    });
-  }
 
-  private setupClickOutsideListener() {
-    document.addEventListener('click', (event) => {
-      const target = event.target as HTMLElement;
-      
-      // Check if click is outside of editor, image, or toolbar
-      if (!this.quillInstance.container.contains(target) && 
-          !target.closest('.floating-toolbar') && 
-          target.tagName !== 'IMG') {
+      const [leaf]:any = this.quillInstance.getLeaf(range.index);
+      const editorBounds = this.quillInstance.container.getBoundingClientRect();
+
+      if (this.isImageLeaf(leaf) && range.length === 0) {
+        const bounds = (leaf.domNode as HTMLImageElement).getBoundingClientRect();
+        this.showImageToolbar(bounds, editorBounds);
+      } else if (range.length > 0) {
+        this.handleTextSelection(range, editorBounds);
+      } else {
         this.quillToolbarService.hideActiveToolbar();
       }
     });
   }
-} 
+
+  private setupClickListener(): void {
+    this.quillInstance.root.addEventListener('click', (event: Event) => {
+      const target = event.target as HTMLElement;
+      
+      if (target.tagName === 'IMG') {
+        this.handleImageClick(target);
+      }
+    });
+  }
+
+  private setupClickOutsideListener(): void {
+    document.addEventListener('click', (event: Event) => {
+      const target = event.target as HTMLElement;
+      const isOutsideEditor = !this.quillInstance.container.contains(target);
+      const isOutsideToolbar = !target.closest('.floating-toolbar');
+      const isNotImage = target.tagName !== 'IMG';
+
+      if (isOutsideEditor && isOutsideToolbar && isNotImage) {
+        this.quillToolbarService.hideActiveToolbar();
+      }
+    });
+  }
+
+  private isImageLeaf(leaf: any): boolean {
+    return leaf?.domNode instanceof HTMLImageElement;
+  }
+
+  private showImageToolbar(bounds: DOMRect, editorBounds: DOMRect): void {
+    this.quillToolbarService.showToolbar('img', {
+      top: bounds.top - editorBounds.top,
+      left: bounds.left + 100
+    });
+  }
+
+  private handleTextSelection(range: QuillRange, editorBounds: DOMRect): void {
+    const bounds = this.quillInstance.getBounds(range.index, range.length);
+    
+    if (bounds) {
+      this.quillToolbarService.showToolbar('txt', {
+        top: bounds.top + 65,
+        left: bounds.left - editorBounds.left + (bounds.width / 2) + 250
+      });
+    }
+  }
+
+  private handleImageClick(target: HTMLElement): void {
+    this.quillInstance.setSelection(null);
+    
+    const bounds = target.getBoundingClientRect();
+    const editorBounds = this.quillInstance.container.getBoundingClientRect();
+
+    requestAnimationFrame(() => {
+      this.showImageToolbar(bounds, editorBounds);
+    });
+  }
+}
