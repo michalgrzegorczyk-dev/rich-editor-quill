@@ -22,6 +22,7 @@ export class QuillEventsService {
   setupEventListeners(textToolbar: HTMLElement) {
     this.setupSelectionChangeListener(textToolbar);
     this.setupClickListener(textToolbar);
+    this.setupClickOutsideListener();
   }
 
   private setupSelectionChangeListener(textToolbar: HTMLElement) {
@@ -63,21 +64,29 @@ export class QuillEventsService {
           this.quillInstance.setSelection(null);
           textToolbar.style.display = 'none';
           
-          console.log('t', target)
-
           const bounds = target.getBoundingClientRect();
-          console.log('b', bounds)
-
           const editorBounds = this.quillInstance.container.getBoundingClientRect();
-          console.log('e', editorBounds)
           
-
           this.quillToolbarService.showToolbar2('img', {
             top: bounds.top - editorBounds.top,
             left: bounds.left + 100
           });
+          event.stopPropagation();
         }
       });
+    });
+  }
+
+  private setupClickOutsideListener() {
+    document.addEventListener('click', (event) => {
+      const target = event.target as HTMLElement;
+      
+      // Check if click is outside of editor, image, or toolbar
+      if (!this.quillInstance.container.contains(target) && 
+          !target.closest('.image-toolbar') && 
+          target.tagName !== 'IMG') {
+        this.quillToolbarService.hideActiveToolbar();
+      }
     });
   }
 } 
