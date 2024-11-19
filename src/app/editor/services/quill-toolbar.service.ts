@@ -123,11 +123,20 @@ export class QuillToolbarService {
       };
     }
 
-    // Add to DOM
+    if (type === 'img') {
+      const imageElements = document.querySelectorAll('img');
+      imageElements.forEach(img => {
+        const imgBounds = img.getBoundingClientRect();
+        if (Math.abs(imgBounds.top - bounds?.top!) < 10 && 
+            Math.abs(imgBounds.left - bounds?.left!) < 10) {
+          this.selectImage(img as HTMLImageElement);
+        }
+      });
+    }
+
     const domElem = componentRef.location.nativeElement;
     document.body.appendChild(domElem);
 
-    // Store reference for cleanup
     this.activeToolbarRef = componentRef;
     componentRef.changeDetectorRef.detectChanges();
   }
@@ -140,6 +149,25 @@ export class QuillToolbarService {
       }
       this.activeToolbarRef.destroy();
       this.activeToolbarRef = null;
+      this.deselectImage();
+    }
+  }
+
+  private selectImage(image: HTMLImageElement) {
+    if (this.selectedImage) {
+      this.selectedImage.style.border = '';
+      this.selectedImage.style.borderRadius = '';
+    }
+    this.selectedImage = image;
+    this.selectedImage.style.border = '2px solid #06c';
+    this.selectedImage.style.borderRadius = '4px';
+  }
+
+  private deselectImage() {
+    if (this.selectedImage) {
+      this.selectedImage.style.border = '';
+      this.selectedImage.style.borderRadius = '';
+      this.selectedImage = null;
     }
   }
 

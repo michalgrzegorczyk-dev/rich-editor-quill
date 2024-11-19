@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import Quill from 'quill';
 import { QuillRange } from '../models/quill-range.model';
 import { QuillToolbarService } from './quill-toolbar.service';
-import { QuillImageService } from './quill-image.service';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +11,6 @@ export class QuillEventsService {
 
   constructor(
     private quillToolbarService: QuillToolbarService,
-    private quillImageService: QuillImageService
   ) {}
 
   initialize(quill: Quill) {
