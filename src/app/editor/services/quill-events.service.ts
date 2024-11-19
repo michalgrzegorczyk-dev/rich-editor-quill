@@ -27,7 +27,6 @@ export class QuillEventsService {
     this.quillInstance.on('selection-change', (range: QuillRange | null) => {
       requestAnimationFrame(() => {
         if (!range) {
-        //   textToolbar.style.display = 'none';
           this.quillToolbarService.hideActiveToolbar();
           return;
         }
@@ -42,12 +41,17 @@ export class QuillEventsService {
             top: bounds.top - editorBounds.top - 45,
             left: bounds.left - editorBounds.left + (bounds.width / 2)
           });
-          // textToolbar.style.display = 'none';
         } else if (range.length > 0) {
-          // textToolbar.style.display = 'block';
-          this.quillToolbarService.hideActiveToolbar();
+          const bounds = this.quillInstance.getBounds(range.index, range.length);
+          if (bounds) {
+            const editorBounds = this.quillInstance.container.getBoundingClientRect();
+            
+            this.quillToolbarService.showToolbar('txt', {
+              top: bounds.top + 65,
+              left: bounds.left - editorBounds.left + (bounds.width / 2) + 250
+            });
+          }
         } else {
-          // textToolbar.style.display = 'none';
           this.quillToolbarService.hideActiveToolbar();
         }
       });
@@ -60,7 +64,6 @@ export class QuillEventsService {
         const target = event.target as HTMLElement;
         if (target.tagName === 'IMG') {
           this.quillInstance.setSelection(null);
-        //   textToolbar.style.display = 'none';
           
           const bounds = target.getBoundingClientRect();
           const editorBounds = this.quillInstance.container.getBoundingClientRect();
@@ -81,7 +84,7 @@ export class QuillEventsService {
       
       // Check if click is outside of editor, image, or toolbar
       if (!this.quillInstance.container.contains(target) && 
-          !target.closest('.image-toolbar') && 
+          !target.closest('.floating-toolbar') && 
           target.tagName !== 'IMG') {
         this.quillToolbarService.hideActiveToolbar();
       }

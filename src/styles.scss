@@ -1,37 +1,19 @@
-.ql-editor img {
-    cursor: pointer;
-  }
-  
-  .ql-editor img.ql-selected {
-    box-shadow: 0 0 0 2px #06c;
-  }
+.ql-editor .block {
+  margin-bottom: 7px;
+  padding: 0.5em;
+  border: 1px solid #dddddd;
+}
 
-  .ql-editor .block {
-    margin-bottom: 1em;
-    padding: 0.5em;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-  }
+.slash-popup {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 1000;
+  min-width: 150px;
+}
 
-  .ql-editor .block:focus {
-    border-color: #06c;
-    outline: none;
-  }
-
-  .slash-popup {
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    z-index: 1000;
-    min-width: 150px;
-  }
-
-  .slash-item {
-    padding: 8px 12px;
-    cursor: pointer;
-  }
-
-  .slash-item:hover {
-    background: #f0f0f0;
-  }
+.slash-item {
+  padding: 8px 12px;
+  cursor: pointer;
+}

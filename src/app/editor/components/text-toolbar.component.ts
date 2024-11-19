@@ -15,13 +15,10 @@ import { Component, Input } from '@angular/core';
         </select>
       </span>
       <span class="ql-formats">
-        <button class="ql-bold"></button>
-        <button class="ql-italic"></button>
-        <button class="ql-underline"></button>
-      </span>
-      <span class="ql-formats">
-        <button class="ql-image"></button>
-        <button class="ql-code-block"></button>
+        <button class="ql-bold">B</button>
+        <button class="ql-italic">I</button>
+        <button class="ql-underline">U</button>
+        <button class="ql-code-block">CODE</button>
       </span>
     </div>
   `,
@@ -52,14 +49,6 @@ import { Component, Input } from '@angular/core';
       padding: 3px 5px;
       width: 28px;
       margin: 0 2px;
-    }
-
-    .ql-toolbar.ql-snow button:hover {
-      color: #06c;
-    }
-
-    .ql-toolbar.ql-snow button.ql-active {
-      color: #06c;
     }
 
     .ql-toolbar.ql-snow .ql-header {
