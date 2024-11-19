@@ -38,9 +38,9 @@ export class QuillEventsService {
           const editorBounds = this.quillInstance.container.getBoundingClientRect();
           
           this.quillToolbarService.showToolbar('img', {
-            top: bounds.top - editorBounds.top - 45,
-            left: bounds.left - editorBounds.left + (bounds.width / 2)
-          });
+            top: bounds.top - editorBounds.top,
+            left: bounds.left + 100
+          });// todo duplicate code
         } else if (range.length > 0) {
           const bounds = this.quillInstance.getBounds(range.index, range.length);
           if (bounds) {

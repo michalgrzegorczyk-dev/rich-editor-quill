@@ -15,7 +15,7 @@ export class QuillConfigService {
     return {
       theme: 'snow',
       modules: {
-        toolbar: false,
+        toolbar: false, // i have custom toolbar components
         keyboard: {
           bindings: this.quillKeyboardService.getKeyboardBindings(
             this.quillSlashMenuService.showMenu.bind(this.quillSlashMenuService)
