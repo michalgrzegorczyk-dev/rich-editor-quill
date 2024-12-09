@@ -1,14 +1,14 @@
 import {Injectable, inject} from '@angular/core';
-import { QuillToolbarService } from './quill-toolbar.service';
-import {QuillInstance} from "../quill-instance";
+import { ToolbarManagerService } from '../../services/toolbar-manager.service';
+import {QuillInstanceService} from "../../config/quill-instance.service";
 
 @Injectable({
   providedIn: 'root'
 })
-export class QuillImageService {
-  private quillInstance = inject(QuillInstance).quill;
+export class ImageService {
+  private quillInstance = inject(QuillInstanceService).quill;
 
-  constructor(private quillToolbarService: QuillToolbarService) {}
+  constructor(private quillToolbarService: ToolbarManagerService) {}
 
   currentImg: HTMLImageElement | null = null;
 
@@ -36,7 +36,7 @@ export class QuillImageService {
         const blot = blocks[0];
         const index = this.quillInstance.getIndex(blot);
         this.quillInstance.deleteText(index, 1);
-        this.quillToolbarService.removeCurrentToolbar();
+        this.quillToolbarService.destroyActiveToolbar();
       }
     }
   }

@@ -4,7 +4,7 @@ import Quill from "quill";
 @Injectable({
   providedIn: 'root'
 })
-export class QuillInstance {
+export class QuillInstanceService {
   quill!: Quill;
 
   start(rootElement: HTMLElement): Quill {

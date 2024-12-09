@@ -1,5 +1,5 @@
 import {Component, Input, ChangeDetectorRef, ChangeDetectionStrategy} from '@angular/core';
-import {QuillInstance} from "../../quill-instance";
+import {QuillInstanceService} from "../../../config/quill-instance.service";
 import {NgIf, NgForOf} from "@angular/common";
 
 @Component({
@@ -27,7 +27,7 @@ export class TextToolbarComponent {
 
   constructor(
     private cdr: ChangeDetectorRef,
-    private quillInstance: QuillInstance
+    private quillInstance: QuillInstanceService
   ) {}
 
   getTopPosition(): number {

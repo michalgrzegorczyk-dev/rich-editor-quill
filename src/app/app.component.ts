@@ -1,5 +1,5 @@
 import {Component, AfterViewInit, ElementRef, inject, viewChild} from '@angular/core';
-import {QuillService} from "./editor/quill.service";
+import {QuillIntegrationService} from "./editor/quill-integration.service";
 import Quill from 'quill';
 import {BlockDivBlot} from "./editor/blots/block-div.blot";
 
@@ -9,17 +9,17 @@ import {BlockDivBlot} from "./editor/blots/block-div.blot";
   template: `<div #editor></div>`,
 })
 export class AppComponent implements AfterViewInit {
-  private editorRootElement = viewChild<ElementRef>('editor');
-  private readonly quillService = inject(QuillService);
+  private rootEditorElement = viewChild<ElementRef>('editor');
+  private readonly quillIntegrationService = inject(QuillIntegrationService);
 
   ngAfterViewInit(): void {
-    Quill.register(BlockDivBlot, true);    // Add color picker module
+    Quill.register(BlockDivBlot, true);
     const BackgroundAttributor:any = Quill.import('attributors/class/background');
     Quill.register(BackgroundAttributor, true);
 
     const ColorClass:any = Quill.import('attributors/class/color');
     Quill.register(ColorClass, true);
 
-    this.quillService.init(this.editorRootElement()?.nativeElement);
+    this.quillIntegrationService.init(this.rootEditorElement()?.nativeElement);
   }
 }

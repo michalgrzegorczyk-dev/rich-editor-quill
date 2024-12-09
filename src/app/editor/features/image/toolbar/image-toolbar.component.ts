@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { QuillImageService } from '../../services/quill-image.service';
+import { ImageService } from '../image.service';
 
 interface ToolbarPosition {
   top: number;
@@ -22,7 +22,7 @@ export class ImageToolbarComponent {
 
   currentSize: ImageSize;
 
-  constructor(private quillImageService: QuillImageService) {
+  constructor(private quillImageService: ImageService) {
     this.currentSize = this.initialSize;
   }
 
