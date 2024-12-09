@@ -1,25 +1,25 @@
-
-import { Component } from '@angular/core';
-import { QuillEditorComponent } from './editor/editor.component';
+import {Component, AfterViewInit, ElementRef, inject, viewChild} from '@angular/core';
+import {QuillService} from "./editor/quill.service";
+import Quill from 'quill';
+import {BlockDivBlot} from "./editor/blots/block-div.blot";
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [QuillEditorComponent],
-  template: `
-    <div>
-      <h1>Ngx Rich Document Editor</h1>
-      <app-quill-editor />
-    </div>
-  `,
-  styles: [
-    `
-      h1 {
-        display: flex;
-        justify-content: center;
-      }
-    `
-  ]
+  template: `<div #editor></div>`,
 })
-export class AppComponent {
+export class AppComponent implements AfterViewInit {
+  private editorRootElement = viewChild<ElementRef>('editor');
+  private readonly quillService = inject(QuillService);
+
+  ngAfterViewInit(): void {
+    Quill.register(BlockDivBlot, true);    // Add color picker module
+    const BackgroundAttributor:any = Quill.import('attributors/class/background');
+    Quill.register(BackgroundAttributor, true);
+
+    const ColorClass:any = Quill.import('attributors/class/color');
+    Quill.register(ColorClass, true);
+
+    this.quillService.init(this.editorRootElement()?.nativeElement);
+  }
 }

@@ -1,0 +1,95 @@
+.floating-toolbar.image-toolbar {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(255, 255, 255, 0.97));
+  backdrop-filter: blur(20px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(230, 232, 235, 0.7);
+  border-radius: 12px;
+  z-index: 1000;
+  padding: 8px 12px;
+  animation: slideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+  button {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid rgba(230, 232, 235, 0.8);
+    background: white;
+    color: #2b2852;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+      color: #2b2852;
+      transition: all 0.2s;
+      width: 16px;
+      height: 16px;
+    }
+
+    &:hover {
+      background: rgba(123, 104, 238, 0.08);
+      transform: translateY(-1px);
+      border-color: #7b68ee;
+      box-shadow: 0 2px 8px rgba(123, 104, 238, 0.1);
+    }
+
+    &.active {
+      background: #7b68ee;
+      border-color: #7b68ee;
+      box-shadow: 0 2px 8px rgba(123, 104, 238, 0.2);
+
+      svg {
+        color: white;
+      }
+    }
+
+    // Delete button styling
+    &.delete-btn {
+      border-color: rgba(239, 68, 68, 0.2);
+
+      svg {
+        color: rgb(239, 68, 68);
+      }
+
+      &:hover {
+        background: rgba(239, 68, 68, 0.08);
+        border-color: rgb(239, 68, 68);
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.1);
+      }
+
+      &:active {
+        background: rgb(239, 68, 68);
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+
+        svg {
+          color: white;
+        }
+      }
+    }
+  }
+
+  .toolbar-divider {
+    width: 1px;
+    height: 18px;
+    background: rgba(230, 232, 235, 0.8);
+    margin: 0 12px;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

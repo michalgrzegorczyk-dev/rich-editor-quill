@@ -1,0 +1,188 @@
+.floating-toolbar {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(255, 255, 255, 0.97));
+  backdrop-filter: blur(20px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(230, 232, 235, 0.7);
+  border-radius: 12px;
+  z-index: 1000;
+  padding: 8px 12px;
+  animation: slideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ql-formats {
+  display: flex;
+  position: relative;
+}
+
+.ql-formats:first-child {
+  margin-right: 0px;
+  padding-right: 0;
+}
+
+.ql-formats:last-child {
+  gap: 0px;
+}
+
+button.ql-bold,
+button.ql-italic,
+button.ql-underline,
+button.ql-code,
+button.ql-color,
+button.ql-background,
+button.ql-reset{
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(230, 232, 235, 0.8);
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button svg {
+  color: #2b2852;
+  transition: all 0.2s;
+  width: 16px;
+  height: 16px;
+}
+
+button:hover {
+  background: rgba(123, 104, 238, 0.08);
+  transform: translateY(-1px);
+  border-color: #7b68ee;
+  box-shadow: 0 2px 8px rgba(123, 104, 238, 0.1);
+}
+
+button.active {
+  background: #7b68ee;
+  border-color: #7b68ee;
+  box-shadow: 0 2px 8px rgba(123, 104, 238, 0.2);
+}
+
+button.active svg {
+  color: white;
+}
+
+.ql-header {
+  width: 140px;
+  height: 32px;
+  border: 1px solid rgba(230, 232, 235, 0.8);
+  border-radius: 8px;
+  padding: 0 28px 0 12px;
+  font-size: 13px;
+  background: white;
+  color: #2b2852;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%232b2852' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 14px;
+}
+
+.toolbar-divider {
+  width: 1px;
+  height: 18px;
+  background: rgba(230, 232, 235, 0.8);
+  margin: 0 12px;
+}
+
+.color-picker-popup {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background: white;
+  border: 1px solid rgba(230, 232, 235, 0.7);
+  border-radius: 10px;
+  padding: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  z-index: 1001;
+  animation: fadeIn 0.2s ease-out;
+
+  &.background-picker {
+    left: auto;
+    right: 0;
+  }
+}
+
+.color-options {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  min-width: 132px;
+}
+
+.color-option {
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(230, 232, 235, 0.8);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  &.selected {
+    border: 2px solid #7b68ee;
+    box-shadow: 0 0 0 2px rgba(123, 104, 238, 0.2);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ql-toolbar.ql-snow .ql-formats {
+  margin-right: 0 !important;
+}
+
+.ql-formats {
+  gap: 5px !important;
+}
+
+.ql-color svg, .ql-background svg {
+  stroke: currentColor;
+}
+
+.color-option {
+  &.selected {
+    border: 2px solid #7b68ee;
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(123, 104, 238, 0.2);
+  }
+}
+
+.ql-color svg, .ql-background svg {
+  stroke: currentColor;
+  fill: none;
+}
+
+.ql-color[style*="background-color"] svg,
+.ql-background[style*="background-color"] svg {
+  stroke: var(--text-color, #2b2852);
+}
+
+/* For dark background colors */
+.ql-color[style*="background-color: rgb(0"],
+.ql-color[style*="background-color: #0"],
+.ql-background[style*="background-color: rgb(0"],
+.ql-background[style*="background-color: #0"] {
+  --text-color: white;
+}

@@ -1,11 +1,36 @@
 html {
   font-family: system-ui,
 }
+body {
+  margin: 40px 260px;
+}
+
+.ql-container.ql-snow {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+  border: 1px solid rgba(230, 232, 235, 0.7) !important;
+  border-radius: 10px !important;
+  padding: 5px !important;
+}
+
+.ql-editor {
+  padding: 14px !important;
+}
 
 .ql-editor .block {
-  margin-bottom: 7px;
-  padding: 0.5em;
-  border: 1px solid #dddddd;
+  font-size: 16px;
+}
+
+.editor-container {
+  height: 825px;
+}
+
+.ql-editor .block,
+.ql-editor h1,
+.ql-editor h2,
+{
+  margin-bottom: 0px !important;
+  padding: 3px !important;
+  //border: 1px solid #dddddd !important;
 }
 
 .slash-popup {
@@ -20,4 +45,27 @@ html {
 .slash-item {
   padding: 8px 12px;
   cursor: pointer;
+}
+
+h1 {
+  display: flex;
+  margin: 0;
+  margin-bottom: 25px;
+}
+
+.ql-color-red { color: #FF0000; }
+.ql-color-blue { color: #0000FF; }
+.ql-color-green { color: #00FF00; }
+.ql-color-yellow { color: #FFFF00; }
+.ql-color-purple { color: #FF00FF; }
+.ql-color-cyan { color: #00FFFF; }
+.ql-color-black { color: #000000; }
+
+.tbbbb {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  z-index: 100;
 }

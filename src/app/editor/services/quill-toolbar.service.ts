@@ -1,12 +1,13 @@
 import { Injectable, ComponentRef, createComponent, ApplicationRef, Injector, Type } from '@angular/core';
-import Quill from 'quill';
-import { ImageToolbarComponent } from '../components/image-toolbar.component';
-import { TextToolbarComponent } from '../components/text-toolbar.component';
+import { ImageToolbarComponent } from '../components/image-toolbar/image-toolbar.component';
+import { TextToolbarComponent } from '../components/text-toolbar/text-toolbar.component';
+import Quill from "quill";
 
 @Injectable({
   providedIn: 'root'
 })
 export class QuillToolbarService {
+  quill!: Quill;
   private selectedImage: HTMLImageElement | null = null;
   private activeToolbarRef: ComponentRef<any> | null = null;
 
@@ -18,20 +19,22 @@ export class QuillToolbarService {
   constructor(
     private appRef: ApplicationRef,
     private injector: Injector
-  ) {}
+  ) {
+  }
 
-  showToolbar(type: string, bounds?: { top: number; left: number }) {
-    this.hideActiveToolbar();
-    
+  showToolbar(type: string, bounds?: { top: number; left: number } ) {
+    this.removeCurrentToolbar();
+
     const ToolbarComponent = this.toolbarMap[type];
 
     const componentRef = createComponent(ToolbarComponent, {
       environmentInjector: this.appRef.injector,
-      elementInjector: this.injector
+      elementInjector: this.injector,
     });
 
     if (bounds) {
       componentRef.instance.position = bounds;
+      componentRef.instance.quill = this.quill;
     }
 
     const domElem = componentRef.location.nativeElement;
@@ -41,7 +44,7 @@ export class QuillToolbarService {
     componentRef.changeDetectorRef.detectChanges();
   }
 
-  hideActiveToolbar() {
+  removeCurrentToolbar() {
     if (this.activeToolbarRef) {
       const element = this.activeToolbarRef.location.nativeElement;
       if (element.parentNode) {
@@ -74,4 +77,4 @@ export class QuillToolbarService {
   getSelectedImage(): HTMLImageElement | null {
     return this.selectedImage;
   }
-} 
+}
