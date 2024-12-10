@@ -34,7 +34,11 @@ export class QuillInstanceService {
         }
       },
 
-      formats: ['block-div', 'image', 'header', 'bold', 'italic', 'underline', 'code-block', 'code', 'color', 'background']
+      formats: [
+        'block-div', 'image', 'header', 'bold', 'italic', 'underline',
+        'code-block', 'code', 'color', 'background', 'align',
+        'list', 'indent',
+      ],
     });
 
     return this.quill;

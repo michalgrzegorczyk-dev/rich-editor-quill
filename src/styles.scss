@@ -2,29 +2,21 @@ html {
   font-family: system-ui,
 }
 
-//// <uniquifier>: Use a unique and descriptive class name
-//// <weight>: Use a value from 100 to 900
-//
-//.raleway-<uniquifier> {
-//            font-family: "Raleway", sans-serif;
-//            font-optical-sizing: auto;
-//            font-weight: <weight>;
-//            font-style: normal;
-//          }
-
-
 body {
-  background: #252525;
-  margin: 60px;
+  margin: 0px;
   padding: 0px;
 }
 
 .ql-container.ql-snow {
   background: white;
-  box-shadow: none !important;
-  border: none !important;
-  border-radius: 10px !important;
-  padding: 18px !important;
+  box-shadow: none;
+  border: 0px solid #d3d3d3 !important;
+  border-radius: 0px !important;
+  padding: 48px !important;
+}
+.bbb {
+  margin-left: 48px !important;
+
 }
 
 .ql-editor {
@@ -33,6 +25,12 @@ body {
 }
 
 .ql-editor .block {
+  font-size: 16px;
+}
+
+.ql-editor ol,
+.ql-editor li,
+{
   font-size: 16px;
 }
 
@@ -88,4 +86,41 @@ h1 {
 
 mat-snack-bar-container {
   background: #ffc9c9 !important;
+}
+
+.ql-editor {
+  h1 {
+    font-size: 31px !important;
+    font-weight: 800 !important;
+    margin-bottom: 10px !important;
+  }
+
+  h2 {
+    font-size: 25px !important;
+    font-weight: 800 !important;
+    margin-bottom: 10px !important;
+  }
+
+  .block {
+    font-size: 16px !important;
+    font-weight: 400 !important;
+    margin-bottom: 10px !important;
+  }
+}
+
+.ql-editor .empty-line {
+  position: relative !important;
+}
+
+.ql-editor .empty-line:before {
+  content: attr(data-placeholder) !important;
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  color: rgba(0, 0, 0, 0.4) !important;
+  pointer-events: none !important;
+  font-style: italic !important;
+  /* Remove z-index and add background color transparency */
+  background: transparent !important;
+  mix-blend-mode: multiply !important;
 }

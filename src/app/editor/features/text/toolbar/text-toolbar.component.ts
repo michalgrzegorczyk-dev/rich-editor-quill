@@ -41,12 +41,25 @@ export class TextToolbarComponent {
 
   isFormatActive(format: string): boolean {
     const formats = this.quillInstance.quill.getFormat();
+    if (format === 'list') {
+      return !!formats['list'] || !!formats['ordered'];
+    }
     return !!formats[format];
   }
 
   toggleFormat(format: string): void {
     const formats = this.quillInstance.quill.getFormat();
-    this.quillInstance.quill.format(format, !formats[format]);
+    if (format === 'ordered' || format === 'bullet') {
+      const currentList = formats['list'];
+      if (currentList === format) {
+        // this.quillInstance.quill.format('list', false);
+        this.quillInstance.quill.format('block-div', true);
+      } else {
+        this.quillInstance.quill.format('list', format);
+      }
+    } else {
+      this.quillInstance.quill.format(format, !formats[format]);
+    }
     this.cdr.detectChanges();
   }
 
@@ -79,7 +92,6 @@ export class TextToolbarComponent {
     this.cdr.detectChanges();
   }
 
-
   getCurrentColor(): string {
     const formats:any = this.quillInstance.quill.getFormat();
     return formats['color'] || this.selectedColor;
@@ -88,6 +100,12 @@ export class TextToolbarComponent {
   getCurrentBgColor(): string {
     const formats:any = this.quillInstance.quill.getFormat();
     return formats['background'] || this.selectedBgColor;
+  }
+
+  getListType():any {
+    const formats = this.quillInstance.quill.getFormat();
+    console.log(formats);
+    return formats['list'] || null;
   }
 
   applyColor(color: string): void {
@@ -115,10 +133,7 @@ export class TextToolbarComponent {
   resetFormatting(): void {
     const range = this.quillInstance.quill.getSelection();
     if (range) {
-      const formats = this.quillInstance.quill.getFormat();
-      // Object.keys(formats).forEach(format => {
-      //   this.quillInstance.quill.removeFormat(range.index, range.length);
-      // });
+      this.quillInstance.quill.removeFormat(range.index, range.length);
       this.activeColor = null;
       this.activeBgColor = null;
       this.selectedColor = 'black';

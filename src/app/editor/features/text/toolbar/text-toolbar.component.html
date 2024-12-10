@@ -1,5 +1,3 @@
-<!--<div style="background-color: red">ESZ</div>-->
-<!-- text-toolbar.component.html-->
 <div [style.left.px]="getLeftPosition()"
      [style.top.px]="getTopPosition()"
      class="floating-toolbar ql-toolbar ql-snow">
@@ -10,6 +8,31 @@
       <option value="2">Heading 2</option>
       <option selected>Normal</option>
     </select>
+  </span>
+
+  <div class="toolbar-divider"></div>
+
+  <span class="ql-formats">
+    <button (click)="toggleFormat('bullet')" [class.active]="getListType() === 'bullet'" class="ql-list">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"></line>
+        <line x1="8" y1="12" x2="21" y2="12"></line>
+        <line x1="8" y1="18" x2="21" y2="18"></line>
+        <circle cx="3" cy="6" r="1"></circle>
+        <circle cx="3" cy="12" r="1"></circle>
+        <circle cx="3" cy="18" r="1"></circle>
+      </svg>
+    </button>
+    <button (click)="toggleFormat('ordered')" [class.active]="getListType() === 'ordered'" class="ql-list">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="10" y1="6" x2="21" y2="6"></line>
+        <line x1="10" y1="12" x2="21" y2="12"></line>
+        <line x1="10" y1="18" x2="21" y2="18"></line>
+        <text x="2" y="7" font-size="8">1</text>
+        <text x="2" y="13" font-size="8">2</text>
+        <text x="2" y="19" font-size="8">3</text>
+      </svg>
+    </button>
   </span>
 
   <div class="toolbar-divider"></div>
@@ -45,34 +68,32 @@
   <div class="toolbar-divider"></div>
 
   <span class="ql-formats">
-<button (click)="toggleColorPicker()" [class.active]="showColorPicker" class="ql-color" [style.background-color]="getCurrentColor() === 'black' ? 'white' : getCurrentColor()">
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M9 3h6l3 7H6z"/>
-    <path d="M12 10v8"/>
-    <path d="M6 21h12"/>
-  </svg>
-</button>
+    <button (click)="toggleColorPicker()" [class.active]="showColorPicker" class="ql-color" [style.background-color]="getCurrentColor() === 'black' ? 'white' : getCurrentColor()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 3h6l3 7H6z"/>
+        <path d="M12 10v8"/>
+        <path d="M6 21h12"/>
+      </svg>
+    </button>
 
-    <!-- Background color icon -->
-<button (click)="toggleBgColorPicker()" [class.active]="showBgColorPicker" class="ql-background" [style.background-color]="getCurrentBgColor()">
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <rect x="2" y="2" width="20" height="20" rx="2"/>
-    <rect x="6" y="6" width="12" height="12" rx="1"/>
-  </svg>
-</button>
+    <button (click)="toggleBgColorPicker()" [class.active]="showBgColorPicker" class="ql-background" [style.background-color]="getCurrentBgColor()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="2" width="20" height="20" rx="2"/>
+        <rect x="6" y="6" width="12" height="12" rx="1"/>
+      </svg>
+    </button>
   </span>
+
   <div class="toolbar-divider"></div>
 
   <span class="ql-formats">
-<button (click)="resetFormatting()" class="ql-reset">
- <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-   <line x1="18" y1="6" x2="6" y2="18"></line>
-   <line x1="6" y1="6" x2="18" y2="18"></line>
- </svg>
-</button>
+    <button (click)="resetFormatting()" class="ql-reset">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
   </span>
-
-
 
   <div *ngIf="showColorPicker" class="color-picker-popup">
     <div class="color-options">
