@@ -20,6 +20,9 @@ dependencies:
   '@angular/forms':
     specifier: ^18.1.0
     version: 18.2.11(@angular/common@18.2.11)(@angular/core@18.2.11)(@angular/platform-browser@18.2.11)(rxjs@7.8.1)
+  '@angular/material':
+    specifier: ^19.0.2
+    version: 19.0.2(@angular/animations@18.2.11)(@angular/cdk@19.0.2)(@angular/common@18.2.11)(@angular/core@18.2.11)(@angular/forms@18.2.11)(@angular/platform-browser@18.2.11)(rxjs@7.8.1)
   '@angular/platform-browser':
     specifier: ^18.1.0
     version: 18.2.11(@angular/animations@18.2.11)(@angular/common@18.2.11)(@angular/core@18.2.11)
@@ -370,7 +373,6 @@ packages:
       tslib: 2.8.1
     optionalDependencies:
       parse5: 7.2.1
-    dev: true
 
   /@angular/cli@18.2.11:
     resolution: {integrity: sha512-0JI1xjOLRemBPjdT/yVlabxc3Zkjqa/lhvVxxVC1XhKoW7yGxIGwNrQ4pka4CcQtCuktO6KPMmTGIu8YgC3cpw==}
@@ -467,6 +469,27 @@ packages:
     dependencies:
       '@angular/common': 18.2.11(@angular/core@18.2.11)(rxjs@7.8.1)
       '@angular/core': 18.2.11(rxjs@7.8.1)(zone.js@0.14.10)
+      '@angular/platform-browser': 18.2.11(@angular/animations@18.2.11)(@angular/common@18.2.11)(@angular/core@18.2.11)
+      rxjs: 7.8.1
+      tslib: 2.8.1
+    dev: false
+
+  /@angular/material@19.0.2(@angular/animations@18.2.11)(@angular/cdk@19.0.2)(@angular/common@18.2.11)(@angular/core@18.2.11)(@angular/forms@18.2.11)(@angular/platform-browser@18.2.11)(rxjs@7.8.1):
+    resolution: {integrity: sha512-IKU6znBKgD0xHEGo5WD3JWNK+WjamMCzAvSa72w4Evo2N6PWN+dAkbCMYxugW7dOfwoT8DvUnjIWclC+RRCl0A==}
+    peerDependencies:
+      '@angular/animations': ^19.0.0 || ^20.0.0
+      '@angular/cdk': 19.0.2
+      '@angular/common': ^19.0.0 || ^20.0.0
+      '@angular/core': ^19.0.0 || ^20.0.0
+      '@angular/forms': ^19.0.0 || ^20.0.0
+      '@angular/platform-browser': ^19.0.0 || ^20.0.0
+      rxjs: ^6.5.3 || ^7.4.0
+    dependencies:
+      '@angular/animations': 18.2.11(@angular/core@18.2.11)
+      '@angular/cdk': 19.0.2(@angular/common@18.2.11)(@angular/core@18.2.11)(rxjs@7.8.1)
+      '@angular/common': 18.2.11(@angular/core@18.2.11)(rxjs@7.8.1)
+      '@angular/core': 18.2.11(rxjs@7.8.1)(zone.js@0.14.10)
+      '@angular/forms': 18.2.11(@angular/common@18.2.11)(@angular/core@18.2.11)(@angular/platform-browser@18.2.11)(rxjs@7.8.1)
       '@angular/platform-browser': 18.2.11(@angular/animations@18.2.11)(@angular/common@18.2.11)(@angular/core@18.2.11)
       rxjs: 7.8.1
       tslib: 2.8.1
@@ -4334,7 +4357,6 @@ packages:
   /entities@4.5.0:
     resolution: {integrity: sha512-V0hjH4dGPh9Ao5p0MoRY6BVqtwCjhz6vI5LT8AJ55H+4g9/4vbHx1I54fS0XuclLhDHArPQCiMjDxjaL8fPxhw==}
     engines: {node: '>=0.12'}
-    dev: true
 
   /env-paths@2.2.1:
     resolution: {integrity: sha512-+h1lkLKhZMTYjog1VEpJNG7NZJWcuc2DDk/qsqSTRRCOXiLjeQ1d1/udrUGhqMxUgAlwKNZ0cf2uqan5GLuS2A==}
@@ -6366,7 +6388,6 @@ packages:
     resolution: {integrity: sha512-BuBYQYlv1ckiPdQi/ohiivi9Sagc9JG+Ozs0r7b/0iK3sKmrb0b9FdWdBbOdx6hBCM/F9Ir82ofnBhtZOjCRPQ==}
     dependencies:
       entities: 4.5.0
-    dev: true
 
   /parseurl@1.3.3:
     resolution: {integrity: sha512-CiyeOxFT/JZyN5m0z9PfXw4SCBJ6Sygz1Dpl0wqjlhDEGGBP1GnsUVEL0p63hoG1fcj3fHynXi9NYO4nWOL+qQ==}

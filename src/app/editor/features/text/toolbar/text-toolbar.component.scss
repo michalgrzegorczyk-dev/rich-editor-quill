@@ -1,5 +1,9 @@
+
+
 .floating-toolbar {
-  position: absolute;
+  margin: 0;
+  margin-bottom: 0;
+  //position: absolute;
   display: flex;
   align-items: center;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(255, 255, 255, 0.97));
@@ -150,7 +154,8 @@ button.active svg {
 }
 
 .ql-toolbar.ql-snow .ql-formats {
-  margin-right: 0 !important;
+  margin-right: 5px !important;
+  margin-left: 5px !important;
 }
 
 .ql-formats {

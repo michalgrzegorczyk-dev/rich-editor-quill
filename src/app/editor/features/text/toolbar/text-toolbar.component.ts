@@ -1,6 +1,7 @@
 import {Component, Input, ChangeDetectorRef, ChangeDetectionStrategy} from '@angular/core';
 import {QuillInstanceService} from "../../../config/quill-instance.service";
 import {NgIf, NgForOf} from "@angular/common";
+import {QuillBounds} from "../../../models/quill-custom.models";
 
 @Component({
   selector: 'app-text-toolbar',
@@ -14,7 +15,7 @@ import {NgIf, NgForOf} from "@angular/common";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TextToolbarComponent {
-  @Input({required: true}) position?: { top: number; left: number };
+  @Input({required: true}) position?: QuillBounds;
   showColorPicker = false;
   showBgColorPicker = false;
   selectedColor = 'black';

@@ -1,11 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ImageService } from '../image.service';
-
-interface ToolbarPosition {
-  top: number;
-  left: number;
-}
+import {QuillBounds} from "../../../models/quill-custom.models";
 
 type ImageSize = 'small' | 'medium' | 'large';
 
@@ -17,7 +13,7 @@ type ImageSize = 'small' | 'medium' | 'large';
   styleUrls: ['./image-toolbar.component.scss']
 })
 export class ImageToolbarComponent {
-  @Input() position?: ToolbarPosition;
+  @Input() position?: QuillBounds;
   @Input() initialSize: ImageSize = 'medium';
 
   currentSize: ImageSize;
@@ -41,7 +37,6 @@ export class ImageToolbarComponent {
 
   resizeImage(size: ImageSize): void {
     this.currentSize = size;
-    this.quillImageService.resizeImage(size);
   }
 
   isCurrentSize(size: ImageSize): boolean {

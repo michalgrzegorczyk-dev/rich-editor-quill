@@ -1,4 +1,5 @@
 export function getInitialContent(): any {
+  // return [];
   return [
     {
       insert: 'Building Modern Web Applications\n',

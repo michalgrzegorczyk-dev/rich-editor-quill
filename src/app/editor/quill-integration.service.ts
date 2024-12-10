@@ -1,10 +1,11 @@
 import {Injectable, inject} from '@angular/core';
 import Quill from 'quill';
-import {QuillRange} from "./models/quill-range.model";
-import {ToolbarManagerService} from "./services/toolbar-manager.service";
+import {QuillRange, QuillBounds} from "./models/quill-custom.models";
+import {ToolbarManagerService} from "./features/toolbar/toolbar-manager.service";
 import {QuillInstanceService} from "./config/quill-instance.service";
 import {ImageService} from "./features/image/image.service";
-import {getInitialContent} from "./config/test-data";
+import {ToolbarType, Toolbar} from "./features/toolbar/toolbar.models";
+import {MatSnackBar} from "@angular/material/snack-bar";
 
 @Injectable({
   providedIn: 'root'
@@ -12,14 +13,17 @@ import {getInitialContent} from "./config/test-data";
 export class QuillIntegrationService {
   private quill!: Quill;
 
+  domNode: HTMLElement | null = null;
   private readonly quillInstanceService = inject(QuillInstanceService);
   private readonly toolbarService = inject(ToolbarManagerService);
   private readonly imageService = inject(ImageService);
+  private readonly snackBar = inject(MatSnackBar);
 
   init(rootElement: HTMLElement): void {
     this.initializeQuill(rootElement);
     this.handleSelectionChange();
     this.handleTextChange();
+    this.handleEditorChange();
   }
 
   handleSelectionChange() {
@@ -38,6 +42,11 @@ export class QuillIntegrationService {
       }
 
       const selectedDomNode = leaf[0].domNode;
+      this.domNode = selectedDomNode;
+
+      if (selectedDomNode instanceof HTMLImageElement) {
+        this.imageService.deselectCurrentImage();
+      }
 
       if (selectedDomNode instanceof Text) {
         if (range.length === 0) {
@@ -47,38 +56,36 @@ export class QuillIntegrationService {
       } else if (selectedDomNode instanceof HTMLImageElement) {
         this.imageService.selectImage(selectedDomNode);
         this.showImageToolbar(range);
-      } else {
-        this.imageService.deselectImage();
       }
     });
   }
 
-  handleTextChange() {
+  private handleTextChange() {
     this.quill.on('text-change', () => {
     });
   }
 
-  displayToolbar(type: string, bounds: { top: number; left: number }) {
-    this.toolbarService.showToolbar(type, {
-      ...bounds,
-      top: bounds.top - 15,
-    });
+  private displayToolbar(type: ToolbarType, bounds: QuillBounds) {
+    console.log('domNode', this.domNode)
+    this.toolbarService.showToolbar(type, bounds, this.domNode);
   }
 
   private initializeQuill(editorElement: HTMLElement) {
     this.quill = this.quillInstanceService.start(editorElement);
-    this.quill.setContents(getInitialContent());
+    this.quill.setContents(JSON.parse(localStorage.getItem('quil_content') || '{}'));
   }
 
   private handleTextSelection(range: QuillRange): void {
     const bounds = this.quill.getBounds(range.index, range.length);
+    console.log('bbb', bounds)
     const currentSelection = this.quill.getSelection();
 
     if (!bounds || !currentSelection) {
       return;
     }
 
-    this.displayToolbar('txt', bounds);
+
+    this.displayToolbar(Toolbar.TXT, bounds);
   }
 
   private showImageToolbar(range: QuillRange): void {
@@ -88,6 +95,21 @@ export class QuillIntegrationService {
       return;
     }
 
-    this.displayToolbar('img', bounds);
+    this.displayToolbar(Toolbar.IMG, bounds);
+  }
+
+  private handleEditorChange() {
+    this.quill.on('editor-change', (eventName: string) => {
+      console.log('EDITOR CHANGE', eventName);
+      localStorage.setItem('quil_content', JSON.stringify(this.quill.getContents()));
+      this.openSnackBar('Content saved successfully');
+    });
+  }
+
+  private openSnackBar(message: string) {
+    // this.snackBar.open(message, 'Close', {
+    //   horizontalPosition: 'right',
+    //   verticalPosition: 'top',
+    // });
   }
 }
