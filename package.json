@@ -1,6 +1,7 @@
 {
   "name": "test-quill",
   "version": "0.0.0",
+  "homepage": "https://michalgrzegorczyk-dev.github.io/test-quill",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -32,6 +33,7 @@
     "@angular/cli": "^18.1.3",
     "@angular/compiler-cli": "^18.1.0",
     "@types/jasmine": "~5.1.0",
+    "angular-cli-ghpages": "2.0.3",
     "jasmine-core": "~5.1.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
