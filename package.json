@@ -1,7 +1,7 @@
 {
-  "name": "test-quill",
+  "name": "rich-editor-quill",
   "version": "0.0.0",
-  "homepage": "https://michalgrzegorczyk-dev.github.io/test-quill",
+  "homepage": "https://michalgrzegorczyk-dev.github.io/rich-editor-quill",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
